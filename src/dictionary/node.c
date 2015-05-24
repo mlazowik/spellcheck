@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-05-23
+    @date 2015-05-24
  */
 
 #include "node.h"
@@ -21,6 +21,8 @@ struct node
     /// Czy w węźle kończy się słowo.
     bool is_word;
 
+    /// Rodzic węzła.
+    Node *parent;
     /// Dzieci węzła.
     Map *children;
 };
@@ -34,6 +36,7 @@ Node * node_new(wchar_t character)
     Node *node = (Node *) malloc(sizeof(Node));
 
     node->value = character;
+    node->parent = NULL;
     node->children = map_new();
 
     return node;
@@ -48,12 +51,22 @@ void node_done(Node *node)
 void node_add_child(Node *node, wchar_t character)
 {
     Node *child = node_new(character);
+    child->parent = node;
     map_insert(node->children, character, child);
 }
 
-Node * node_get_child(Node *node, wchar_t character)
+Node * node_get_child(const Node *node, wchar_t character)
 {
     return map_find(node->children, character);
+}
+
+Node * node_get_parent(const Node *node)
+{
+    return node->parent;
+}
+
+wchar_t node_get_key(const Node *node) {
+    return node->value;
 }
 
 int node_remove_child(Node *node, wchar_t character)
@@ -66,7 +79,7 @@ bool node_has_child(const Node *node, wchar_t character)
     return (map_find(node->children, character) != NULL);
 }
 
-bool node_id_word(const Node *node)
+bool node_is_word(const Node *node)
 {
     return node->is_word;
 }
@@ -74,6 +87,11 @@ bool node_id_word(const Node *node)
 void node_set_is_word(Node *node, bool is_word)
 {
     node->is_word = is_word;
+}
+
+int node_children_count(const Node *node)
+{
+    return map_size(node->children);
 }
 
 /**@}*/

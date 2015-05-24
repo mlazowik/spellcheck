@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-05-23
+    @date 2015-05-24
  */
 
 #ifndef __MAP_H__

@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-05-23
+    @date 2015-05-24
  */
 
 #include "map.h"
@@ -186,13 +186,22 @@ Map * map_new(void)
     return map;
 }
 
+void map_done(Map *map) {
+    for (int i = 0; i < map->size; i++) {
+        node_done((map->data[i]).val);
+    }
+
+    free(map->data);
+    free(map);
+}
+
 int map_insert(Map *map, wchar_t key, Node *val) {
     increase_capacity_if_needed(map);
 
     int pos = find_position(map, key);
     if (pos < map->size && compare(map, pos, key) == 0)
     {
-        return 1;
+        return 0;
     }
 
     if (pos < map->size)
@@ -204,7 +213,7 @@ int map_insert(Map *map, wchar_t key, Node *val) {
     (map->data[pos]).val = val;
     map->size++;
 
-    return 0;
+    return 1;
 }
 
 int map_delete(Map *map, wchar_t key) {
@@ -212,8 +221,10 @@ int map_delete(Map *map, wchar_t key) {
 
     if (pos == map->size || compare(map, pos, key) != 0)
     {
-        return 1;
+        return 0;
     }
+
+    node_done((map->data[pos].val));
 
     if (pos + 1 < map->size)
     {
@@ -224,7 +235,7 @@ int map_delete(Map *map, wchar_t key) {
 
     decrease_capacity_if_needed(map);
 
-    return 0;
+    return 1;
 }
 
 Node * map_find(const Map *map, wchar_t key) {

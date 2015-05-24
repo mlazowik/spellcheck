@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-05-23
+    @date 2015-05-24
  */
 
 #ifndef __NODE_H__
@@ -45,7 +45,21 @@ void node_add_child(Node *node, wchar_t character);
   @param[in] character Znak szukanego węzła.
   @return Wskaźnik na syna lub NULL jeśli nie istnieje.
   */
-Node * node_get_child(Node *node, wchar_t character);
+Node * node_get_child(const Node *node, wchar_t character);
+
+/**
+  Zwraca syna węzła o określonym znaku.
+  @param[in,out] node Węzeł.
+  @return Wskaźnik na ojca lub NULL jeśli nie istnieje.
+  */
+Node * node_get_parent(const Node *node);
+
+/**
+  Zwraca klucz danego węzła.
+  @param[in,out] node Węzeł.
+  @return Klucz węzła.
+  */
+wchar_t node_get_key(const Node *node);
 
 /**
   Usuwa syna węzła o określonym znaku.
@@ -76,5 +90,12 @@ bool node_is_word(const Node *node);
   @param[in] is_word Wartość logiczna określająca czy w węźle kończy się słowo
   */
 void node_set_is_word(Node *node, bool is_word);
+
+/**
+  Zwraca liczbę dzieci węzła.
+  @param[in,out] node Węzeł.
+  @return Liczba dzieci węzła.
+  */
+int node_children_count(const Node *node);
 
 #endif /* __NODE_H__ */
