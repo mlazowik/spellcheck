@@ -49,6 +49,9 @@ struct map
     MapEntry *data;
 };
 
+/** @name Funkcje pomocnicze
+  @{
+  */
 /**
   Zmienia pojemność zbioru.
   @param[in,out] map Zbiór.
@@ -167,6 +170,7 @@ static int find_position(const Map *map, wchar_t key)
     return l;
 }
 
+/**@}*/
 /** @name Elementy interfejsu
   @{
   */
