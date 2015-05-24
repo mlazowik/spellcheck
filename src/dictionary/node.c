@@ -9,7 +9,7 @@
 
 #include "node.h"
 #include "map.h"
-#include "stdlib.h"
+#include <stdlib.h>
 
 /**
   Struktura przechowująca węzeł.
