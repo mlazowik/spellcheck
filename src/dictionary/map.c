@@ -28,7 +28,8 @@
 /**
   Struktura przechowująca parę <klucz, wartość>
   */
-typedef struct {
+typedef struct
+{
     /// Klucz.
     wchar_t key;
     /// Wartość.
@@ -38,7 +39,8 @@ typedef struct {
 /**
   Struktura przechowująca zbiór.
   */
-struct map {
+struct map
+{
     /// Rozmiar (liczba elementów)
     size_t size;
     /// Pojemność (aktualnie zarezerwowana pamięć)
@@ -52,9 +54,11 @@ struct map {
   @param[in,out] map Zbiór.
   @param[in] new_capacity Docelowa pojemność.
   */
-static void change_capacity(Map *map, size_t new_capacity) {
+static void change_capacity(Map *map, size_t new_capacity)
+{
     void *new_data = realloc(map->data, sizeof(MapEntry) * new_capacity);
-    if (!new_data) {
+    if (!new_data)
+    {
         fprintf(stderr, "Failed to reallocate memory for Map");
         exit(EXIT_FAILURE);
     }
@@ -67,8 +71,10 @@ static void change_capacity(Map *map, size_t new_capacity) {
   Zwiększa pojemność jeśli nie starczyłoby jej na dodanie kolejnego elementu.
   @param[in,out] map Zbiór.
   */
-static void increase_capacity_if_needed(Map *map) {
-    if (map->size == map->capacity) {
+static void increase_capacity_if_needed(Map *map)
+{
+    if (map->size == map->capacity)
+    {
         float new_capacity = (float)(map->capacity) * GROWTH_FACTOR;
         size_t new_capacity_rounded = (size_t)new_capacity + 1;
 
@@ -82,10 +88,13 @@ static void increase_capacity_if_needed(Map *map) {
   przyrostu pamięci).
   @param[in,out] map Zbiór.
   */
-static void decrease_capacity_if_needed(Map *map) {
-    if (map->size < map->capacity / (2 * GROWTH_FACTOR)) {
+static void decrease_capacity_if_needed(Map *map)
+{
+    if (map->size < map->capacity / (2 * GROWTH_FACTOR))
+    {
         size_t new_capacity = map->capacity / GROWTH_FACTOR;
-        if (new_capacity < MAP_MINIMAL_CAPACITY) {
+        if (new_capacity < MAP_MINIMAL_CAPACITY)
+        {
             new_capacity = MAP_MINIMAL_CAPACITY;
         }
 
@@ -99,7 +108,8 @@ static void decrease_capacity_if_needed(Map *map) {
   @param[in] start Indeks pierwszego przesuwanego elementu.
   @param[in] offset O ile miejsc przesunąć.
   */
-static void shift_array(Map *map, int start, int offset) {
+static void shift_array(Map *map, int start, int offset)
+{
     memmove(
         &(map->data[start + offset]),
         &(map->data[start]),
@@ -115,7 +125,8 @@ static void shift_array(Map *map, int start, int offset) {
   @return >0 jeśli pierwszy jest większy, 0 jeśli równe,
     <0 jeśli drugi jest większy.
   */
-static int compare(const Map *map, int pos, wchar_t key) {
+static int compare(const Map *map, int pos, wchar_t key)
+{
     assert(pos < map->size);
 
     wchar_t lhs[2], rhs[2];
@@ -136,13 +147,18 @@ static int compare(const Map *map, int pos, wchar_t key) {
   @param[in] key Klucz.
   @return Pozycja klucza, lub miejsce w którym powinien się znaleźć.
   */
-static int find_position(const Map *map, wchar_t key) {
+static int find_position(const Map *map, wchar_t key)
+{
     int l = 0, r = map->size, mid = (l + r) / 2;
 
-    while (r - l > 0) {
-        if (compare(map, mid, key) > 0) {
+    while (r - l > 0)
+    {
+        if (compare(map, mid, key) > 0)
+        {
             l = mid + 1;
-        } else {
+        }
+        else
+        {
             r = mid;
         }
         mid = (l + r) / 2;
@@ -155,7 +171,8 @@ static int find_position(const Map *map, wchar_t key) {
   @{
   */
 
-Map * map_new(void) {
+Map * map_new(void)
+{
     Map *map = (Map *) malloc(sizeof(Map));
 
     map->size = 0;
@@ -169,11 +186,13 @@ int map_insert(Map *map, wchar_t key, Node *val) {
     increase_capacity_if_needed(map);
 
     int pos = find_position(map, key);
-    if (pos < map->size && compare(map, pos, key) == 0) {
+    if (pos < map->size && compare(map, pos, key) == 0)
+    {
         return 1;
     }
 
-    if (pos < map->size) {
+    if (pos < map->size)
+    {
         shift_array(map, pos, 1);
     }
 
@@ -187,11 +206,13 @@ int map_insert(Map *map, wchar_t key, Node *val) {
 int map_delete(Map *map, wchar_t key) {
     int pos = find_position(map, key);
 
-    if (pos == map->size || compare(map, pos, key) != 0) {
+    if (pos == map->size || compare(map, pos, key) != 0)
+    {
         return 1;
     }
 
-    if (pos + 1 < map->size) {
+    if (pos + 1 < map->size)
+    {
         shift_array(map, pos+1, -1);
     }
 
@@ -205,14 +226,16 @@ int map_delete(Map *map, wchar_t key) {
 Node * map_find(const Map *map, wchar_t key) {
     int pos = find_position(map, key);
 
-    if (pos == map->size || compare(map, pos, key) != 0) {
+    if (pos == map->size || compare(map, pos, key) != 0)
+    {
         return NULL;
     }
 
     return (map->data[pos]).val;
 }
 
-size_t map_size(const Map *map) {
+size_t map_size(const Map *map)
+{
     return map->size;
 }
 
