@@ -12,6 +12,7 @@
 
 #include <wchar.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 /**
   Struktura przechowująca drzewo.
@@ -54,5 +55,21 @@ int trie_delete_word(Trie *trie, const wchar_t *word);
   @return Wartość logiczna określająca czy słowo istnieje.
   */
 bool trie_has_word(const Trie *trie, const wchar_t *word);
+
+/**
+ Zapisuje drzewo.
+ @param[in] trie Drzewo.
+ @param[in,out] stream Strumień, gdzie ma być zapisane drzewo.
+ @return <0 jeśli operacja się nie powiedzie, 0 w p.p.
+ */
+int trie_save(const Trie *trie, FILE* stream);
+
+/**
+ Inicjuje i wczytuje drzewo.
+ Drzewo te należy zniszczyć za pomocą trie_done().
+ @param[in,out] stream Strumień, skąd ma być wczytany drzewo.
+ @return Nowe drzewo lub NULL, jeśli operacja się nie powiedzie.
+ */
+Trie * trie_load(FILE* stream);
 
 #endif /* __TRIE_H__ */

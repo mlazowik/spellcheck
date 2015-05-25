@@ -57,6 +57,14 @@ int map_delete(Map *map, wchar_t key);
 Node * map_find(const Map *map, wchar_t key);
 
 /**
+  Zwraca element o danym indeksie ze zbioru.
+  @param[in,out] map Zbiór.
+  @param[in] index Indeks.
+  @return Element zbioru lub NULL, jeśli nie istnieje.
+  */
+Node * map_get_by_index(const Map *map, int index);
+
+/**
   Zwraca liczę elementów w ziorze.
   @param[in] map Zbiór.
   @return Liczba elementów zbioru.

@@ -11,6 +11,7 @@
 #include "node.h"
 #include <stdlib.h>
 #include <string.h>
+#include <wctype.h>
 
 /**
  Struktura przechowująca drzewo.
@@ -122,6 +123,53 @@ bool trie_has_word(const Trie *trie, const wchar_t *word)
     }
 
     return true;
+}
+
+int trie_save(const Trie *trie, FILE* stream)
+{
+    return node_save(trie->root, stream);
+}
+
+Trie * trie_load(FILE* stream)
+{
+    Trie *trie = trie_new();
+    Node *node = trie->root;
+
+    wchar_t c;
+    while ((c = fgetwc(stream)) != EOF)
+    {
+        if (c == L'*')
+        {
+            node_set_is_word(node, true);
+        }
+        else if (c == L'^')
+        {
+            node = node_get_parent(node);
+            if (node == NULL)
+            {
+                trie_done(trie);
+                return NULL;
+            }
+        }
+        else
+        {
+            if (!iswalpha(c))
+            {
+                trie_done(trie);
+                return NULL;
+            }
+            node_add_child(node, c);
+            node = node_get_child(node, c);
+        }
+    }
+
+    if (ferror(stream))
+    {
+        trie_done(trie);
+        return NULL;
+    }
+
+    return trie;
 }
 
 /**@}*/

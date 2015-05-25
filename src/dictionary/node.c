@@ -38,12 +38,17 @@ Node * node_new(wchar_t character)
     node->value = character;
     node->parent = NULL;
     node->children = map_new();
+    node->is_word = false;
 
     return node;
 }
 
 void node_done(Node *node)
 {
+    for (int i = 0; i < node_children_count(node); i++) {
+        node_done(map_get_by_index(node->children, i));
+    }
+
     map_done(node->children);
     free(node);
 }
@@ -52,7 +57,10 @@ void node_add_child(Node *node, wchar_t character)
 {
     Node *child = node_new(character);
     child->parent = node;
-    map_insert(node->children, character, child);
+    if (!map_insert(node->children, character, child))
+    {
+        node_done(child);
+    }
 }
 
 Node * node_get_child(const Node *node, wchar_t character)
@@ -92,6 +100,21 @@ void node_set_is_word(Node *node, bool is_word)
 int node_children_count(const Node *node)
 {
     return map_size(node->children);
+}
+
+int node_save(const Node *node, FILE* stream)
+{
+    for (int i = 0; i < node_children_count(node); i++)
+    {
+        Node *child = map_get_by_index(node->children, i);
+
+        if (fprintf(stream, "%lc", child->value) < 0) return -1;
+        if (node_is_word(child) && fprintf(stream, "%lc", L'*') < 0) return -1;
+        if (node_save(child, stream) < 0) return -1;
+        if (fprintf(stream, "%lc", L'^') < 0) return -1;
+    }
+
+    return 0;
 }
 
 /**@}*/

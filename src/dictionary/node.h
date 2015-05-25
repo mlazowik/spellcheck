@@ -12,6 +12,7 @@
 
 #include <wchar.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 /**
   Struktura przechowująca węzeł.
@@ -97,5 +98,13 @@ void node_set_is_word(Node *node, bool is_word);
   @return Liczba dzieci węzła.
   */
 int node_children_count(const Node *node);
+
+/**
+  Zapisuje poddrzewo danego węzła.
+  @param[in] node Węzeł.
+  @param[in,out] stream Strumień, gdzie ma być zapisany węzeł.
+  @return <0 jeśli operacja się nie powiedzie, 0 w p.p.
+  */
+int node_save(const Node *node, FILE* stream);
 
 #endif /* __NODE_H__ */

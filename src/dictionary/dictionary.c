@@ -1,15 +1,17 @@
 /** @file
-  Prosta implementacja słownika.
-  Słownik przechowuje listę słów.
+  Implementacja słownika.
+  Słownik przechowuje drzewo trie.
 
   @ingroup dictionary
   @author Jakub Pawlewicz <pan@mimuw.edu.pl>
+  @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
   @copyright Uniwerstet Warszawski
-  @date 2015-05-11
+  @date 2015-05-24
   @todo Napisać efektywną implementację.
  */
 
 #include "dictionary.h"
+#include "trie.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -17,11 +19,11 @@
 
 /**
   Struktura przechowująca słownik.
-  Na razie prosta implementacja z użyciem listy słów.
  */
 struct dictionary
 {
-    struct word_list list; ///< Lista przechowująca słowa w słowniku.
+    /// Drzewo
+    Trie *trie;
 };
 
 /** @name Funkcje pomocnicze
@@ -33,7 +35,7 @@ struct dictionary
  */
 static void dictionary_free(struct dictionary *dict)
 {
-    word_list_done(&dict->list);
+    trie_done(dict->trie);
 }
 
 static void skip_equal(const wchar_t **a, const wchar_t **b)
@@ -81,7 +83,7 @@ struct dictionary * dictionary_new()
 {
     struct dictionary *dict =
         (struct dictionary *) malloc(sizeof(struct dictionary));
-    word_list_init(&dict->list);
+    dict->trie = trie_new();
     return dict;
 }
 
@@ -93,54 +95,42 @@ void dictionary_done(struct dictionary *dict)
 
 int dictionary_insert(struct dictionary *dict, const wchar_t *word)
 {
-    if (dictionary_find(dict, word))
-        return 0;
-    word_list_add(&dict->list, word);
-    return 1;
+    return trie_insert_word(dict->trie, word);
 }
 
 int dictionary_delete(struct dictionary *dict, const wchar_t *word)
 {
-    /// @bug `struct word_list` nie obsługuje operacji usuwania.
-    return 0;
+    return trie_delete_word(dict->trie, word);
 }
 
 bool dictionary_find(const struct dictionary *dict, const wchar_t* word)
 {
-    const wchar_t * const * a = word_list_get(&dict->list);
-    for (size_t i = 0; i < word_list_size(&dict->list); i++)
-        if (!wcscmp(a[i], word))
-            return true;
-    return false;
+    return trie_has_word(dict->trie, word);
 }
 
 int dictionary_save(const struct dictionary *dict, FILE* stream)
 {
-    const wchar_t * const * a = word_list_get(&dict->list);
-    for (size_t i = 0; i < word_list_size(&dict->list); i++)
-        if (fprintf(stream, "%ls\n", a[i]) < 0)
-            return -1;
-    return 0;
+    return trie_save(dict->trie, stream);
 }
 
 struct dictionary * dictionary_load(FILE* stream)
 {
     struct dictionary *dict = dictionary_new();
-    wchar_t buf[32];
-    while (fscanf(stream, "%32ls", buf) != EOF)
-        dictionary_insert(dict, buf);
-    if (ferror(stream))
-    {
+
+    dict->trie = trie_load(stream);
+
+    if (dict->trie == NULL) {
         dictionary_done(dict);
-        dict = NULL;
+        return NULL;
     }
+
     return dict;
 }
 
 void dictionary_hints(const struct dictionary *dict, const wchar_t* word,
         struct word_list *list)
 {
-    word_list_init(list);
+    /*word_list_init(list);
     size_t wlen = wcslen(word);
     const wchar_t * const * a = word_list_get(&dict->list);
     for (size_t i = 0; i < word_list_size(&dict->list); i++)
@@ -161,7 +151,7 @@ void dictionary_hints(const struct dictionary *dict, const wchar_t* word,
             if (can_transform_by_delete(a[i], word))
                 word_list_add(list, a[i]);
         }
-    }
+    }*/
 }
 
 /**@}*/

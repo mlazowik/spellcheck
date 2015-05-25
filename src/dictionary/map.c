@@ -187,10 +187,6 @@ Map * map_new(void)
 }
 
 void map_done(Map *map) {
-    for (int i = 0; i < map->size; i++) {
-        node_done((map->data[i]).val);
-    }
-
     free(map->data);
     free(map);
 }
@@ -247,6 +243,14 @@ Node * map_find(const Map *map, wchar_t key) {
     }
 
     return (map->data[pos]).val;
+}
+
+Node * map_get_by_index(const Map *map, int index) {
+    if (index < 0 || index > map->size) {
+        return NULL;
+    }
+
+    return (map->data[index]).val;
 }
 
 size_t map_size(const Map *map)
