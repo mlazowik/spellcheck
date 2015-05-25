@@ -45,7 +45,8 @@ Node * node_new(wchar_t character)
 
 void node_done(Node *node)
 {
-    for (int i = 0; i < node_children_count(node); i++) {
+    for (int i = 0; i < node_children_count(node); i++)
+    {
         node_done(map_get_by_index(node->children, i));
     }
 

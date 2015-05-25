@@ -119,7 +119,8 @@ struct dictionary * dictionary_load(FILE* stream)
 
     dict->trie = trie_load(stream);
 
-    if (dict->trie == NULL) {
+    if (dict->trie == NULL)
+    {
         dictionary_done(dict);
         return NULL;
     }

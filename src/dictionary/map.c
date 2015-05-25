@@ -245,8 +245,10 @@ Node * map_find(const Map *map, wchar_t key) {
     return (map->data[pos]).val;
 }
 
-Node * map_get_by_index(const Map *map, int index) {
-    if (index < 0 || index > map->size) {
+Node * map_get_by_index(const Map *map, int index)
+{
+    if (index < 0 || index > map->size)
+    {
         return NULL;
     }
 

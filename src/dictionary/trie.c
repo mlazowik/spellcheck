@@ -113,12 +113,14 @@ bool trie_has_word(const Trie *trie, const wchar_t *word)
     for (int i = 0; i < word_length; i++)
     {
         current_node = node_get_child(current_node, word[i]);
-        if (current_node == NULL) {
+        if (current_node == NULL)
+        {
             return false;
         }
     }
 
-    if (!node_is_word(current_node)) {
+    if (!node_is_word(current_node))
+    {
         return false;
     }
 
