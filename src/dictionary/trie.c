@@ -26,10 +26,11 @@ struct trie
   @{
   */
 
-static void remove_non_words(Node *last_node)
+/*
+ Usuwa zbędne węzły idąc "w górę" drzewa od podanego węzła.
+ */
+static void remove_non_words(Node *node)
 {
-    Node *node = last_node;
-
     while (node_children_count(node) == 0
            && !node_is_word(node)
            && node_get_parent(node) != NULL)

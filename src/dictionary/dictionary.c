@@ -29,15 +29,18 @@ struct dictionary
 /** @name Funkcje pomocnicze
   @{
  */
-/**
-  Czyszczenie pamięci słownika
-  @param[in,out] dict słownik
+
+/*
+ Czyszczenie pamięci słownika
  */
 static void dictionary_free(struct dictionary *dict)
 {
     trie_done(dict->trie);
 }
 
+/*
+ Przesuwa wskaźniki słów do pierwszego miejsca w którym znaki się różnią.
+ */
 static void skip_equal(const wchar_t **a, const wchar_t **b)
 {
     while (**a == **b && **a != L'\0')
@@ -47,13 +50,10 @@ static void skip_equal(const wchar_t **a, const wchar_t **b)
     }
 }
 
-/**
-  Zwraca czy słowo `a` można zamienić w `b` przez usunięcie znaku.
-  @param[in] a Dłuższe słowo.
-  @param[in] b Krótsze słowo.
-  @return 1 jeśli się da zamienić `a` w `b` przez usunięcia znaku, 0 w p.p.
+/*
+ Zwraca czy słowo `a` można zamienić w `b` przez usunięcie znaku.
  */
-static int can_transform_by_delete(const wchar_t *a, const wchar_t *b)
+static bool can_transform_by_delete(const wchar_t *a, const wchar_t *b)
 {
     skip_equal(&a, &b);
     a++;
@@ -61,13 +61,10 @@ static int can_transform_by_delete(const wchar_t *a, const wchar_t *b)
     return *a == L'\0' && *b == L'\0';
 }
 
-/**
-  Zwraca czy słowo `a` można zamienić w `b` przez zamianę znaku.
-  @param[in] a Pierwsze słowo.
-  @param[in] b Drugie słowo.
-  @return 1 jeśli się da zamienić `a` w `b` przez zamianę znaku, 0 w p.p.
+/*
+ Zwraca czy słowo `a` można zamienić w `b` przez zamianę znaku.
  */
-static int can_transform_by_replace(const wchar_t *a, const wchar_t *b)
+static bool can_transform_by_replace(const wchar_t *a, const wchar_t *b)
 {
     skip_equal(&a, &b);
     a++; b++;

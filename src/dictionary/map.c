@@ -52,11 +52,10 @@ struct map
 /** @name Funkcje pomocnicze
   @{
   */
-/**
-  Zmienia pojemność zbioru.
-  @param[in,out] map Zbiór.
-  @param[in] new_capacity Docelowa pojemność.
-  */
+
+/*
+ Zmienia pojemność zbioru.
+ */
 static void change_capacity(Map *map, size_t new_capacity)
 {
     void *new_data = realloc(map->data, sizeof(MapEntry) * new_capacity);
@@ -70,10 +69,9 @@ static void change_capacity(Map *map, size_t new_capacity)
     map->capacity = new_capacity;
 }
 
-/**
-  Zwiększa pojemność jeśli nie starczyłoby jej na dodanie kolejnego elementu.
-  @param[in,out] map Zbiór.
-  */
+/*
+ Zwiększa pojemność jeśli nie starczyłoby jej na dodanie kolejnego elementu.
+ */
 static void increase_capacity_if_needed(Map *map)
 {
     if (map->size == map->capacity)
@@ -85,12 +83,11 @@ static void increase_capacity_if_needed(Map *map)
     }
 }
 
-/**
-  Zmniejsza pojemność jeśli jest wyraźnie za duża.
-  Wyraźne za duża tzn. elementów zbioru jest mniej niż 1 / 2*(współczynnik
-  przyrostu pamięci).
-  @param[in,out] map Zbiór.
-  */
+/*
+ Zmniejsza pojemność jeśli jest wyraźnie za duża.
+ Wyraźne za duża tzn. elementów zbioru jest mniej niż 1 / 2*(współczynnik
+ przyrostu pamięci).
+ */
 static void decrease_capacity_if_needed(Map *map)
 {
     if (map->size < map->capacity / (2 * GROWTH_FACTOR))
@@ -105,12 +102,9 @@ static void decrease_capacity_if_needed(Map *map)
     }
 }
 
-/**
-  Przesuwa elementy tablicy.
-  @param[in,out] map Zbiór.
-  @param[in] start Indeks pierwszego przesuwanego elementu.
-  @param[in] offset O ile miejsc przesunąć.
-  */
+/*
+ Przesuwa elementy tablicy od miejsca `start` o `offest` elementów.
+ */
 static void shift_array(Map *map, int start, int offset)
 {
     memmove(
@@ -120,14 +114,9 @@ static void shift_array(Map *map, int start, int offset)
     );
 }
 
-/**
-  Porównuje klucz pod daną pozycją w zbiorze z podanym kluczem.
-  @param[in,out] map Zbiór.
-  @param[in] pos Pozycja w zbiorze, pod którą jest pierwszy porównywany klucz.
-  @param[in] key Drugi porównywany klucz.
-  @return >0 jeśli pierwszy jest większy, 0 jeśli równe,
-    <0 jeśli drugi jest większy.
-  */
+/*
+ Porównuje klucz pod daną pozycją w zbiorze z podanym kluczem.
+ */
 static int compare(const Map *map, int pos, wchar_t key)
 {
     assert(pos < map->size);
@@ -143,13 +132,10 @@ static int compare(const Map *map, int pos, wchar_t key)
     return wcscoll(lhs, rhs);
 }
 
-/**
-  Wyszukuje pozycję danego klucza, lub pozycję na którą należy go wstawić.
-  Złożoność: O(nlogn)
-  @param[in,out] map Zbiór.
-  @param[in] key Klucz.
-  @return Pozycja klucza, lub miejsce w którym powinien się znaleźć.
-  */
+/*
+ Wyszukuje pozycję danego klucza, lub pozycję na którą należy go wstawić.
+ Złożoność: O(nlogn)
+ */
 static int find_position(const Map *map, wchar_t key)
 {
     int l = 0, r = map->size, mid = (l + r) / 2;
