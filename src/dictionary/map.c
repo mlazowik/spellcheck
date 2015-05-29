@@ -16,7 +16,7 @@
 /**
   Minimalna i początkowa pojemność.
   */
-#define MAP_MINIMAL_CAPACITY 20
+#define MAP_MINIMAL_CAPACITY 2
 
 /**
   Współczynnik przyrostu pamięci.
