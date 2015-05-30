@@ -220,7 +220,8 @@ int map_delete(Map *map, wchar_t key) {
     return 1;
 }
 
-Node * map_find(const Map *map, wchar_t key) {
+Node * map_find(const Map *map, wchar_t key)
+{
     int pos = find_position(map, key);
 
     if (pos == map->size || compare(map, pos, key) != 0)
