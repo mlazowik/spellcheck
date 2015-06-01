@@ -108,24 +108,13 @@ int trie_delete_word(Trie *trie, const wchar_t *word)
 
 bool trie_has_word(const Trie *trie, const wchar_t *word)
 {
-    Node *current_node = trie->root;
-    size_t word_length = wcslen(word);
+    return node_has_word(trie->root, word);
+}
 
-    for (int i = 0; i < word_length; i++)
-    {
-        current_node = node_get_child(current_node, word[i]);
-        if (current_node == NULL)
-        {
-            return false;
-        }
-    }
-
-    if (!node_is_word(current_node))
-    {
-        return false;
-    }
-
-    return true;
+void trie_get_hints(const Trie *trie, const wchar_t *word,
+                    struct word_list *list)
+{
+    node_get_hints(trie->root, word, list);
 }
 
 int trie_save(const Trie *trie, FILE* stream)

@@ -13,6 +13,8 @@
 #include <wchar.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "word_list.h"
+#include "trie.h"
 
 /**
   Struktura przechowująca węzeł.
@@ -98,6 +100,24 @@ void node_set_is_word(Node *node, bool is_word);
   @return Liczba dzieci węzła.
   */
 int node_children_count(const Node *node);
+
+/**
+  Sprawdza, czy podddrzewo zawiera dane słowo.
+  @param[in,out] node Węzeł.
+  @param[in] word Sprawdzane słowo.
+  @return Wartość logiczna określająca czy słowo istnieje.
+  */
+bool node_has_word(const Node *node, const wchar_t *word);
+
+/**
+  Dodaje podpowiedzi dla danego słowa i węzła do listy podpowiedzi.
+  @param[in] node Węzeł.
+  @param[in] word Sprawdzane słowo.
+  @param[in,out] list Lista podpowiedzi.
+  @return Wartość logiczna określająca czy słowo istnieje.
+ */
+void node_get_hints(const Node *node, const wchar_t *word,
+                    struct word_list *list);
 
 /**
   Zapisuje poddrzewo danego węzła.

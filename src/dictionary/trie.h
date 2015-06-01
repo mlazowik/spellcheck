@@ -13,6 +13,7 @@
 #include <wchar.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "word_list.h"
 
 /**
   Struktura przechowująca drzewo.
@@ -49,7 +50,7 @@ int trie_insert_word(Trie *trie, const wchar_t *word);
 int trie_delete_word(Trie *trie, const wchar_t *word);
 
 /**
-  Sprawdza, czy istnieje syn o danym znaku.
+  Sprawdza, czy drzewo zawiera dane słowo.
   @param[in,out] trie Drzewo.
   @param[in] word Sprawdzane słowo.
   @return Wartość logiczna określająca czy słowo istnieje.
@@ -57,18 +58,34 @@ int trie_delete_word(Trie *trie, const wchar_t *word);
 bool trie_has_word(const Trie *trie, const wchar_t *word);
 
 /**
- Zapisuje drzewo.
- @param[in] trie Drzewo.
- @param[in,out] stream Strumień, gdzie ma być zapisane drzewo.
- @return <0 jeśli operacja się nie powiedzie, 0 w p.p.
+  Dodaje podpowiedzi dla danego słowa do listy podpowiedzi.
+  @param[in] trie Węzeł.
+  @param[in] word Sprawdzane słowo.
+  @param[in,out] list Lista podpowiedzi.
+  */
+void trie_get_hints(const Trie *trie, const wchar_t *word,
+                    struct word_list *list);
+
+/**
+  Zwraca listę słów zapisanych w drzewie.
+  @param[in] trie Drzewp
+  @param[in,out] list Lista słów w drzewie.
+  */
+void trie_to_word_list(const Trie *trie, struct word_list *list);
+
+/**
+  Zapisuje drzewo.
+  @param[in] trie Drzewo.
+  @param[in,out] stream Strumień, gdzie ma być zapisane drzewo.
+  @return <0 jeśli operacja się nie powiedzie, 0 w p.p.
  */
 int trie_save(const Trie *trie, FILE* stream);
 
 /**
- Inicjuje i wczytuje drzewo.
- Drzewo te należy zniszczyć za pomocą trie_done().
- @param[in,out] stream Strumień, skąd ma być wczytany drzewo.
- @return Nowe drzewo lub NULL, jeśli operacja się nie powiedzie.
+  Inicjuje i wczytuje drzewo.
+  Drzewo te należy zniszczyć za pomocą trie_done().
+  @param[in,out] stream Strumień, skąd ma być wczytany drzewo.
+  @return Nowe drzewo lub NULL, jeśli operacja się nie powiedzie.
  */
 Trie * trie_load(FILE* stream);
 
