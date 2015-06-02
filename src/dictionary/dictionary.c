@@ -107,6 +107,8 @@ void dictionary_hints(const struct dictionary *dict, const wchar_t* word,
 
     trie_get_hints(dict->trie, word, hints);
     trie_to_word_list(hints, list);
+
+    word_list_sort(list);
 }
 
 /**@}*/

@@ -105,6 +105,13 @@ static void increase_capacity_if_needed(struct word_list *list,
     increase_buffer_capacity_if_needed(list, next_word_length);
 }
 
+static int word_compare(const void *a, const void *b)
+{
+    wchar_t *_a = *(wchar_t**)a;
+    wchar_t *_b = *(wchar_t**)b;
+
+    return wcscoll(_a, _b);
+}
 
 /** @name Elementy interfejsu 
    @{
@@ -145,6 +152,11 @@ int word_list_add(struct word_list *list, const wchar_t *word)
     list->buffer_size += len;
 
     return 1;
+}
+
+void word_list_sort(struct word_list *list)
+{
+    qsort(list->array, list->size, sizeof(wchar_t*), word_compare);
 }
 
 /**@}*/

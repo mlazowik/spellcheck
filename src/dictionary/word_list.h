@@ -55,6 +55,12 @@ void word_list_done(struct word_list *list);
 int word_list_add(struct word_list *list, const wchar_t *word);
 
 /**
+  Sortuje listę.
+  @param[in,out] list Lista słów.
+  */
+void word_list_sort(struct word_list *list);
+
+/**
   Zwraca liczę słów w liście.
   @param[in] list Lista słów.
   @return Liczba słów w liście.
