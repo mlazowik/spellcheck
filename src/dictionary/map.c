@@ -142,13 +142,13 @@ static int find_position(const Map *map, wchar_t key)
 
     while (r - l > 0)
     {
-        if (compare(map, mid, key) > 0)
+        if (compare(map, mid, key) >= 0)
         {
-            l = mid + 1;
+            r = mid;
         }
         else
         {
-            r = mid;
+            l = mid + 1;
         }
         mid = (l + r) / 2;
     }
