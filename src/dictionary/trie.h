@@ -58,10 +58,10 @@ int trie_delete_word(Trie *trie, const wchar_t *word);
 bool trie_has_word(const Trie *trie, const wchar_t *word);
 
 /**
-  Dodaje podpowiedzi dla danego słowa do listy podpowiedzi.
+  Dodaje podpowiedzi dla danego słowa do drzewa podpowiedzi.
   @param[in] trie Węzeł.
   @param[in] word Sprawdzane słowo.
-  @param[in,out] list Lista podpowiedzi.
+  @param[in,out] hints Drzewo podpowiedzi.
   */
 void trie_get_hints(const Trie *trie, const wchar_t *word, Trie *hints);
 

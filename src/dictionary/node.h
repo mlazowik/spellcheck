@@ -110,10 +110,10 @@ int node_children_count(const Node *node);
 bool node_has_word(const Node *node, const wchar_t *word);
 
 /**
-  Dodaje podpowiedzi dla danego słowa i węzła do listy podpowiedzi.
+  Dodaje podpowiedzi dla danego słowa i węzła do drzewa podpowiedzi.
   @param[in] node Węzeł.
   @param[in] word Sprawdzane słowo.
-  @param[in,out] list Lista podpowiedzi.
+  @param[in,out] hints Drzewo podpowiedzi.
   @return Wartość logiczna określająca czy słowo istnieje.
  */
 void node_get_hints(const Node *node, const wchar_t *word, Trie *hints);

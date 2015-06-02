@@ -29,6 +29,10 @@
   */
 #define GROWTH_FACTOR 1.5
 
+/** @name Funkcje pomocnicze
+ @{
+ */
+
 /*
  Zmienia pojemność tablicy wskaźników na słowa.
  */
@@ -105,6 +109,9 @@ static void increase_capacity_if_needed(struct word_list *list,
     increase_buffer_capacity_if_needed(list, next_word_length);
 }
 
+/*
+ Porwónuje słowa, uwzględniając loacle.
+ */
 static int word_compare(const void *a, const void *b)
 {
     wchar_t *_a = *(wchar_t**)a;
@@ -113,6 +120,7 @@ static int word_compare(const void *a, const void *b)
     return wcscoll(_a, _b);
 }
 
+/**@}*/
 /** @name Elementy interfejsu 
    @{
  */
