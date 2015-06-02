@@ -37,8 +37,9 @@ static void remove_non_words(Node *node)
            && !node_is_word(node)
            && node_get_parent(node) != NULL)
     {
+        Node *parent = node_get_parent(node);
         node_remove_child(node_get_parent(node), node_get_key(node));
-        node = node_get_parent(node);
+        node = parent;
     }
 }
 
