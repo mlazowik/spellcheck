@@ -63,8 +63,7 @@ bool trie_has_word(const Trie *trie, const wchar_t *word);
   @param[in] word Sprawdzane słowo.
   @param[in,out] list Lista podpowiedzi.
   */
-void trie_get_hints(const Trie *trie, const wchar_t *word,
-                    struct word_list *list);
+void trie_get_hints(const Trie *trie, const wchar_t *word, Trie *hints);
 
 /**
   Zwraca listę słów zapisanych w drzewie.

@@ -47,6 +47,12 @@ struct dictionary * dictionary_new()
 {
     struct dictionary *dict =
         (struct dictionary *) malloc(sizeof(struct dictionary));
+    if (!dict)
+    {
+        fprintf(stderr, "Failed to allocate memory for dictionary\n");
+        exit(EXIT_FAILURE);
+    }
+
     dict->trie = trie_new();
 
     return dict;
@@ -96,8 +102,11 @@ struct dictionary * dictionary_load(FILE* stream)
 void dictionary_hints(const struct dictionary *dict, const wchar_t* word,
                       struct word_list *list)
 {
+    Trie *hints = trie_new();
     word_list_init(list);
-    trie_get_hints(dict->trie, word, list);
+
+    trie_get_hints(dict->trie, word, hints);
+    trie_to_word_list(hints, list);
 }
 
 /**@}*/

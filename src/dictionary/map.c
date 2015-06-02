@@ -16,7 +16,7 @@
 /**
   Minimalna i początkowa pojemność.
   */
-#define MAP_MINIMAL_CAPACITY 2
+#define MINIMAL_CAPACITY 2
 
 /**
   Współczynnik przyrostu pamięci.
@@ -61,7 +61,7 @@ static void change_capacity(Map *map, size_t new_capacity)
     void *new_data = realloc(map->data, sizeof(MapEntry) * new_capacity);
     if (!new_data)
     {
-        fprintf(stderr, "Failed to reallocate memory for Map");
+        fprintf(stderr, "Failed to reallocate memory for map\n");
         exit(EXIT_FAILURE);
     }
 
@@ -93,9 +93,9 @@ static void decrease_capacity_if_needed(Map *map)
     if (map->size < map->capacity / (2 * GROWTH_FACTOR))
     {
         size_t new_capacity = map->capacity / GROWTH_FACTOR;
-        if (new_capacity < MAP_MINIMAL_CAPACITY)
+        if (new_capacity < MINIMAL_CAPACITY)
         {
-            new_capacity = MAP_MINIMAL_CAPACITY;
+            new_capacity = MINIMAL_CAPACITY;
         }
 
         change_capacity(map, new_capacity);
@@ -166,8 +166,13 @@ Map * map_new(void)
     Map *map = (Map *) malloc(sizeof(Map));
 
     map->size = 0;
-    map->capacity = MAP_MINIMAL_CAPACITY;
+    map->capacity = MINIMAL_CAPACITY;
     map->data = malloc(sizeof(MapEntry) * map->capacity);
+    if (!map->data)
+    {
+        fprintf(stderr, "Failed to allocate memory for map\n");
+        exit(EXIT_FAILURE);
+    }
 
     return map;
 }

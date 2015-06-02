@@ -20,6 +20,8 @@ struct trie
 {
     /// Korzeń.
     Node *root;
+    /// Długość najdłuższego słowa jakie kiedykolwiek było w drzewie.
+    size_t longest;
 };
 
 /** @name Funkcje pomocnicze
@@ -48,8 +50,14 @@ static void remove_non_words(Node *node)
 Trie * trie_new(void)
 {
     Trie *trie = (Trie *) malloc(sizeof(Trie));
+    if (!trie)
+    {
+        fprintf(stderr, "Failed to allocate memory for trie\n");
+        exit(EXIT_FAILURE);
+    }
 
     trie->root = node_new(L'\0');
+    trie->longest = 0;
 
     return trie;
 }
@@ -77,6 +85,8 @@ int trie_insert_word(Trie *trie, const wchar_t *word)
     }
 
     node_set_is_word(current_node, true);
+
+    if (word_length > trie->longest) trie->longest = word_length;
 
     return 1;
 }
@@ -111,10 +121,15 @@ bool trie_has_word(const Trie *trie, const wchar_t *word)
     return node_has_word(trie->root, word);
 }
 
-void trie_get_hints(const Trie *trie, const wchar_t *word,
-                    struct word_list *list)
+void trie_get_hints(const Trie *trie, const wchar_t *word, Trie *hints)
 {
-    node_get_hints(trie->root, word, list);
+    node_get_hints(trie->root, word, hints);
+}
+
+void trie_to_word_list(const Trie *trie, struct word_list *list)
+{
+    wchar_t prefix[trie->longest + 1];
+    node_add_words_to_list(trie->root, prefix, 0, list);
 }
 
 int trie_save(const Trie *trie, FILE* stream)

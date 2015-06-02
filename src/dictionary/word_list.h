@@ -3,28 +3,15 @@
 
     @ingroup dictionary
     @author Jakub Pawlewicz <pan@mimuw.edu.pl>
+    @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwerstet Warszawski
-    @date 2015-05-10
-    @todo Poszerzyć implementację, aby można było trzymać dowolną
-      liczbę słów.
+    @date 2015-06-02
  */
 
 #ifndef __WORD_LIST_H__
 #define __WORD_LIST_H__
 
 #include <wchar.h>
-
-/**
-  Maksymalna liczba słów przechowywana w liście słów.
-  */
-#define WORD_LIST_MAX_WORDS 32
-
-
-/**
-  Łączna liczba znaków słów przechowywanych w liście słów
-  włącznie ze znakami \0 kończącymi słowo.
-  */
-#define WORD_LIST_SUM 1024
 
 /**
   Struktura przechowująca listę słów.
@@ -35,12 +22,16 @@ struct word_list
 {
     /// Liczba słów.
     size_t size;
+    /// Pojemność listy słów
+    size_t capacity;
     /// Łączna liczba znaków.
     size_t buffer_size;
+    /// Pojemność bufora
+    size_t buffer_capacity;
     /// Tablica słów.
-    const wchar_t *array[WORD_LIST_MAX_WORDS];
+    const wchar_t **array;
     /// Bufor, w którym pamiętane są słowa.
-    wchar_t buffer[WORD_LIST_SUM];
+    wchar_t *buffer;
 };
 
 /**

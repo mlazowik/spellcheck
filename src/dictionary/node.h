@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-05-24
+    @date 2015-06-02
  */
 
 #ifndef __NODE_H__
@@ -116,8 +116,17 @@ bool node_has_word(const Node *node, const wchar_t *word);
   @param[in,out] list Lista podpowiedzi.
   @return Wartość logiczna określająca czy słowo istnieje.
  */
-void node_get_hints(const Node *node, const wchar_t *word,
-                    struct word_list *list);
+void node_get_hints(const Node *node, const wchar_t *word, Trie *hints);
+
+/**
+  Dodaje słowa kończące się w dzieciach węzła do listy słów.
+  @param[in] node Węzeł.
+  @param[in] prefix Prefiks dla wszystkich słów.
+  @param[in] depth Głębokość w drzewie.
+  @param[in,out] list Lista do której są dodawane słowa.
+  */
+void node_add_words_to_list(const Node *node, wchar_t *prefix,
+                            size_t depth, struct word_list *list);
 
 /**
   Zapisuje poddrzewo danego węzła.
