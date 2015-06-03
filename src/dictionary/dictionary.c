@@ -7,7 +7,6 @@
   @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
   @copyright Uniwerstet Warszawski
   @date 2015-05-24
-  @todo Napisać efektywną implementację.
  */
 
 #include "dictionary.h"
