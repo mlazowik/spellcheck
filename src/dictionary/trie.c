@@ -144,7 +144,7 @@ Trie * trie_load(FILE* stream)
     Node *node = trie->root;
 
     wchar_t c;
-    while ((c = fgetwc(stream)) != EOF)
+    while ((c = fgetwc(stream)) != WEOF)
     {
         if (c == L'*')
         {
