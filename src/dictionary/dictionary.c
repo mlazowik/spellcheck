@@ -85,15 +85,14 @@ int dictionary_save(const struct dictionary *dict, FILE* stream)
 
 struct dictionary * dictionary_load(FILE* stream)
 {
+    Trie *trie = trie_load(stream);
+
+    if (trie == NULL) return NULL;
+
     struct dictionary *dict = dictionary_new();
 
+    trie_done(dict->trie);
     dict->trie = trie_load(stream);
-
-    if (dict->trie == NULL)
-    {
-        dictionary_done(dict);
-        return NULL;
-    }
 
     return dict;
 }
