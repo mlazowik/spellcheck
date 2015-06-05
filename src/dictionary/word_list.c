@@ -78,7 +78,7 @@ static void increase_array_capacity_if_needed(struct word_list *list)
     if (list->size == list->capacity)
     {
         float new_capacity = (float)(list->capacity) * GROWTH_FACTOR;
-        size_t new_capacity_rounded = (size_t)new_capacity + 1;
+        size_t new_capacity_rounded = (size_t)(new_capacity + 1);
 
         change_array_capacity(list, new_capacity_rounded);
     }
@@ -93,7 +93,7 @@ static void increase_buffer_capacity_if_needed(struct word_list *list,
     while (list->buffer_size + next_word_length >= list->buffer_capacity)
     {
         float new_capacity = (float)(list->buffer_capacity) * GROWTH_FACTOR;
-        size_t new_capacity_rounded = (size_t)new_capacity + 1;
+        size_t new_capacity_rounded = (size_t)(new_capacity + 1);
 
         change_buffer_capacity(list, new_capacity_rounded);
     }

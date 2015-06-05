@@ -77,7 +77,7 @@ static void increase_capacity_if_needed(Map *map)
     if (map->size == map->capacity)
     {
         float new_capacity = (float)(map->capacity) * GROWTH_FACTOR;
-        size_t new_capacity_rounded = (size_t)new_capacity + 1;
+        size_t new_capacity_rounded = (size_t)(new_capacity + 1);
 
         change_capacity(map, new_capacity_rounded);
     }
@@ -115,24 +115,6 @@ static void shift_array(Map *map, int start, int offset)
 }
 
 /*
- Porównuje klucz pod daną pozycją w zbiorze z podanym kluczem.
- */
-static int compare(const Map *map, int pos, wchar_t key)
-{
-    assert(pos < map->size);
-
-    wchar_t lhs[2], rhs[2];
-
-    lhs[0] = (map->data[pos]).key;
-    lhs[1] = L'\0';
-
-    rhs[0] = key;
-    rhs[1] = L'\0';
-
-    return wcscoll(lhs, rhs);
-}
-
-/*
  Wyszukuje pozycję danego klucza, lub pozycję na którą należy go wstawić.
  Złożoność: O(nlogn)
  */
@@ -142,7 +124,7 @@ static int find_position(const Map *map, wchar_t key)
 
     while (r - l > 0)
     {
-        if (compare(map, mid, key) >= 0)
+        if ((map->data[mid]).key >= key)
         {
             r = mid;
         }
@@ -186,7 +168,7 @@ int map_insert(Map *map, wchar_t key, Node *val) {
     increase_capacity_if_needed(map);
 
     int pos = find_position(map, key);
-    if (pos < map->size && compare(map, pos, key) == 0)
+    if (pos < map->size && (map->data[pos]).key == key)
     {
         return 0;
     }
@@ -206,7 +188,7 @@ int map_insert(Map *map, wchar_t key, Node *val) {
 int map_delete(Map *map, wchar_t key) {
     int pos = find_position(map, key);
 
-    if (pos == map->size || compare(map, pos, key) != 0)
+    if (pos == map->size || (map->data[pos]).key != key)
     {
         return 0;
     }
@@ -229,7 +211,7 @@ Node * map_find(const Map *map, wchar_t key)
 {
     int pos = find_position(map, key);
 
-    if (pos == map->size || compare(map, pos, key) != 0)
+    if (pos == map->size || (map->data[pos]).key != key)
     {
         return NULL;
     }
