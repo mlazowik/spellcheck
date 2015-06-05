@@ -83,6 +83,7 @@ int dictionary_save(const struct dictionary *dict, FILE* stream);
   */
 struct dictionary * dictionary_load(FILE* stream);
 
+
 /**
   Sprawdza, czy dane słowo znajduje się w słowniku.
   @param[in] dict Słownik.
