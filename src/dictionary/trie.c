@@ -4,7 +4,7 @@
  @ingroup dictionary
  @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
  @copyright Uniwersytet Warszawski
- @date 2015-05-24
+ @date 2015-06-05
  */
 
 #include "trie.h"
@@ -29,13 +29,21 @@ struct trie
   */
 
 /*
+ Stwierdza, czy można usunąć węzeł.
+ */
+static bool can_remove(const Node *node)
+{
+    return (node_children_count(node) == 0
+            && !node_is_word(node)
+            && node_get_parent(node) != NULL);
+}
+
+/*
  Usuwa zbędne węzły idąc "w górę" drzewa od podanego węzła.
  */
 static void remove_non_words(Node *node)
 {
-    while (node_children_count(node) == 0
-           && !node_is_word(node)
-           && node_get_parent(node) != NULL)
+    while (can_remove(node))
     {
         Node *parent = node_get_parent(node);
         node_remove_child(node_get_parent(node), node_get_key(node));
@@ -48,7 +56,7 @@ static void remove_non_words(Node *node)
  @{
  */
 
-Trie * trie_new(void)
+Trie * trie_new()
 {
     Trie *trie = (Trie *) malloc(sizeof(Trie));
     if (!trie)

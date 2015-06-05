@@ -5,7 +5,7 @@
     @author Jakub Pawlewicz <pan@mimuw.edu.pl>
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwerstet Warszawski
-    @date 2015-06-02
+    @date 2015-06-05
  */
 
 #ifndef __WORD_LIST_H__

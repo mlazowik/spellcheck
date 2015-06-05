@@ -1,12 +1,12 @@
 /** @file
-  Implementacja słownika.
-  Słownik przechowuje drzewo trie.
+    Implementacja słownika.
+    Słownik przechowuje drzewo trie.
 
-  @ingroup dictionary
-  @author Jakub Pawlewicz <pan@mimuw.edu.pl>
-  @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
-  @copyright Uniwerstet Warszawski
-  @date 2015-05-24
+    @ingroup dictionary
+    @author Jakub Pawlewicz <pan@mimuw.edu.pl>
+    @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
+    @copyright Uniwerstet Warszawski
+    @date 2015-06-05
  */
 
 #include "dictionary.h"
@@ -41,7 +41,7 @@ static void dictionary_free(struct dictionary *dict)
 /**@}*/
 /** @name Elementy interfejsu 
   @{
- */
+  */
 struct dictionary * dictionary_new()
 {
     struct dictionary *dict =

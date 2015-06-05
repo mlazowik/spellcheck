@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-05-24
+    @date 2015-06-05
  */
 
 #ifndef __MAP_H__
@@ -23,7 +23,7 @@ typedef struct map Map;
   Należy go zniszczyć za pomocą map_done()
   @return Nowy zbiór.
   */
-Map * map_new(void);
+Map * map_new();
 
 /**
   Destrukcja zbioru.
@@ -38,7 +38,7 @@ void map_done(Map *map);
   @param[in] val Dodawany węzeł.
   @return 0 jeśli element o danym kluczu już istnieje, 1 w p.p.
   */
-int map_insert(Map *map, wchar_t key, Node *val);
+int map_insert(Map *map, const wchar_t key, Node *val);
 
 /**
   Usuwa element o danym kluczu ze zbioru.
@@ -46,23 +46,23 @@ int map_insert(Map *map, wchar_t key, Node *val);
   @param[in] key Klucz usuwanego węzeła.
   @return 0 jeśli element nie istnieje, 1 w p.p.
   */
-int map_delete(Map *map, wchar_t key);
+int map_delete(Map *map, const wchar_t key);
 
 /**
   Zwraca element o danym kluczu ze zbioru.
-  @param[in,out] map Zbiór.
+  @param[in] map Zbiór.
   @param[in] key Klucz szukanego węzeła.
   @return Element zbioru lub NULL, jeśli nie istnieje.
   */
-Node * map_find(const Map *map, wchar_t key);
+Node * map_find(const Map *map, const wchar_t key);
 
 /**
   Zwraca element o danym indeksie ze zbioru.
-  @param[in,out] map Zbiór.
+  @param[in] map Zbiór.
   @param[in] index Indeks.
   @return Element zbioru lub NULL, jeśli nie istnieje.
   */
-Node * map_get_by_index(const Map *map, int index);
+Node * map_get_by_index(const Map *map, const int index);
 
 /**
   Zwraca liczę elementów w ziorze.

@@ -5,7 +5,7 @@
     @author Jakub Pawlewicz <pan@mimuw.edu.pl>
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwerstet Warszawski
-    @date 2015-06-02
+    @date 2015-06-05
  */
 
 #include "word_list.h"
@@ -36,7 +36,8 @@
 /*
  Zmienia pojemność tablicy wskaźników na słowa.
  */
-static void change_array_capacity(struct word_list *list, size_t new_capacity)
+static void change_array_capacity(struct word_list *list,
+                                  const size_t new_capacity)
 {
     void *new_data = realloc(list->array, sizeof(wchar_t*) * new_capacity);
     if (!new_data)
@@ -50,9 +51,21 @@ static void change_array_capacity(struct word_list *list, size_t new_capacity)
 }
 
 /*
+ Aktualizuje wskaźniki na słowa w buforze.
+ */
+static void update_word_pointers(struct word_list *list, const int delta)
+{
+    for (size_t i = 0; i < list->size; i++)
+    {
+        list->array[i] += delta;
+    }
+}
+
+/*
  Zmienia pojemność bufora.
  */
-static void change_buffer_capacity(struct word_list *list, size_t new_capacity)
+static void change_buffer_capacity(struct word_list *list,
+                                   const size_t new_capacity)
 {
     void *new_data = realloc(list->buffer, sizeof(wchar_t) * new_capacity);
     if (!new_data)
@@ -61,10 +74,7 @@ static void change_buffer_capacity(struct word_list *list, size_t new_capacity)
         exit(EXIT_FAILURE);
     }
 
-    for (size_t i = 0; i < list->size; i++)
-    {
-        list->array[i] += (wchar_t*) new_data - list->buffer;
-    }
+    update_word_pointers(list, (wchar_t*) new_data - list->buffer);
 
     list->buffer = new_data;
     list->buffer_capacity = new_capacity;
@@ -88,7 +98,7 @@ static void increase_array_capacity_if_needed(struct word_list *list)
  Zwiększa pojemność bufora jeśli nie starczyłoby jej na dodanie kolejnego słowa.
  */
 static void increase_buffer_capacity_if_needed(struct word_list *list,
-                                               size_t next_word_length)
+                                               const size_t next_word_length)
 {
     while (list->buffer_size + next_word_length >= list->buffer_capacity)
     {
@@ -103,14 +113,14 @@ static void increase_buffer_capacity_if_needed(struct word_list *list,
  Zwiększa pojemność listy jeśli nie starczyłoby jej na dodanie kolejnego słowa.
  */
 static void increase_capacity_if_needed(struct word_list *list,
-                                               size_t next_word_length)
+                                        const size_t next_word_length)
 {
     increase_array_capacity_if_needed(list);
     increase_buffer_capacity_if_needed(list, next_word_length);
 }
 
 /*
- Porwónuje słowa, uwzględniając loacle.
+ Porwónuje słowa, uwzględniając lcale.
  */
 static int word_compare(const void *a, const void *b)
 {

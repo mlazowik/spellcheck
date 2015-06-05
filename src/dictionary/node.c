@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-06-02
+    @date 2015-06-05
  */
 
 #include "node.h"
@@ -28,14 +28,14 @@ struct node
 };
 
 /** @name Funkcje pomocnicze
- @{
- */
+  @{
+  */
 
 /*
  Dodaje do listy istniejące słowa, które można uzyskać przez dodanie litery
  przed pozycją pos.
  */
-static void get_hints_add(const Node *node, wchar_t *add, size_t pos,
+static void get_hints_add(const Node *node, wchar_t *add, const size_t pos,
                           Trie *hints)
 {
     for (size_t j = 0; j < node_children_count(node); j++)
@@ -54,8 +54,8 @@ static void get_hints_add(const Node *node, wchar_t *add, size_t pos,
  Dodaje do listy istniejące słowa, które można uzyskać przez zamianę litery
  na pozycji pos.
  */
-static void get_hints_replace(const Node *node, wchar_t *replace, size_t pos,
-                              Trie *hints)
+static void get_hints_replace(const Node *node, wchar_t *replace,
+                              const size_t pos, Trie *hints)
 {
     for (size_t j = 0; j < node_children_count(node); j++)
     {
@@ -73,8 +73,8 @@ static void get_hints_replace(const Node *node, wchar_t *replace, size_t pos,
  Dodaje do listy istniejące słowa, które można uzyskać przez usunięcie litery
  z pozycji pos.
  */
-static void get_hints_remove(const Node *node, wchar_t *remove, size_t pos,
-                             Trie *hints)
+static void get_hints_remove(const Node *node, const wchar_t *remove,
+                             const size_t pos, Trie *hints)
 {
     if (node_has_word(node, remove + pos))
     {
@@ -87,7 +87,7 @@ static void get_hints_remove(const Node *node, wchar_t *remove, size_t pos,
   @{
   */
 
-Node * node_new(wchar_t character)
+Node * node_new(const wchar_t character)
 {
     Node *node = (Node *) malloc(sizeof(Node));
     if (!node)
@@ -115,7 +115,7 @@ void node_done(Node *node)
     free(node);
 }
 
-void node_add_child(Node *node, wchar_t character)
+void node_add_child(Node *node, const wchar_t character)
 {
     Node *child = node_new(character);
     child->parent = node;
@@ -125,7 +125,7 @@ void node_add_child(Node *node, wchar_t character)
     }
 }
 
-Node * node_get_child(const Node *node, wchar_t character)
+Node * node_get_child(const Node *node, const wchar_t character)
 {
     return map_find(node->children, character);
 }
@@ -139,14 +139,9 @@ wchar_t node_get_key(const Node *node) {
     return node->value;
 }
 
-int node_remove_child(Node *node, wchar_t character)
+int node_remove_child(Node *node, const wchar_t character)
 {
     return map_delete(node->children, character);
-}
-
-bool node_has_child(const Node *node, wchar_t character)
-{
-    return (map_find(node->children, character) != NULL);
 }
 
 bool node_is_word(const Node *node)
@@ -154,12 +149,12 @@ bool node_is_word(const Node *node)
     return node->is_word;
 }
 
-void node_set_is_word(Node *node, bool is_word)
+void node_set_is_word(Node *node, const bool is_word)
 {
     node->is_word = is_word;
 }
 
-int node_children_count(const Node *node)
+const int node_children_count(const Node *node)
 {
     return map_size(node->children);
 }
@@ -211,7 +206,7 @@ void node_get_hints(const Node *node, const wchar_t *word, Trie *hints)
 }
 
 void node_add_words_to_list(const Node *node, wchar_t *prefix,
-                            size_t depth, struct word_list *list)
+                            const size_t depth, struct word_list *list)
 {
     prefix[depth+1] = L'\0';
 

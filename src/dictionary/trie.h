@@ -4,7 +4,7 @@
  @ingroup dictionary
  @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
  @copyright Uniwersytet Warszawski
- @date 2015-05-24
+ @date 2015-06-05
  */
 
 #ifndef __TRIE_H__
@@ -25,7 +25,7 @@ typedef struct trie Trie;
   Należy je zniszczyć za pomocą trie_done()
   @return Nowe drzewo.
   */
-Trie * trie_new(void);
+Trie * trie_new();
 
 /**
   Destrukcja drzewa.
@@ -51,7 +51,7 @@ int trie_delete_word(Trie *trie, const wchar_t *word);
 
 /**
   Sprawdza, czy drzewo zawiera dane słowo.
-  @param[in,out] trie Drzewo.
+  @param[in] trie Drzewo.
   @param[in] word Sprawdzane słowo.
   @return Wartość logiczna określająca czy słowo istnieje.
   */
@@ -82,7 +82,7 @@ int trie_save(const Trie *trie, FILE* stream);
 
 /**
   Inicjuje i wczytuje drzewo.
-  Drzewo te należy zniszczyć za pomocą trie_done().
+  Drzewo to należy zniszczyć za pomocą trie_done().
   @param[in,out] stream Strumień, skąd ma być wczytany drzewo.
   @return Nowe drzewo lub NULL, jeśli operacja się nie powiedzie.
  */

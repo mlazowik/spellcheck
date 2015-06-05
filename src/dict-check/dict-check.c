@@ -212,14 +212,16 @@ static void print_word(FILE *stream, const int n_char, const int n_line,
   */
 static void parse_input(FILE *stream)
 {
+    wchar_t c;
     wchar_t word[MAX_WORD_LENGTH+1];
 
     int n_char = 1, n_line = 1;
-    while ((word[0] = fgetwc(stream)) != WEOF)
+    while ((c = fgetwc(stream)) != WEOF)
     {
-        if (iswalpha(word[0]))
+        if (iswalpha(c))
         {
-            parse_word(stream, word+1);
+            ungetwc(c, stream);
+            parse_word(stream, word);
             print_word(stdout, n_char, n_line, word);
             n_char += wcslen(word);
         }
@@ -227,13 +229,13 @@ static void parse_input(FILE *stream)
         {
             n_char++;
 
-            if (word[0] == L'\n')
+            if (c == L'\n')
             {
                 n_char = 1;
                 n_line++;
             }
 
-            fprintf(stdout, "%lc", word[0]);
+            fprintf(stdout, "%lc", c);
         }
     }
 

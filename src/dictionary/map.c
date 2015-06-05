@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-05-24
+    @date 2015-06-05
  */
 
 #include "map.h"
@@ -56,7 +56,7 @@ struct map
 /*
  Zmienia pojemność zbioru.
  */
-static void change_capacity(Map *map, size_t new_capacity)
+static void change_capacity(Map *map, const size_t new_capacity)
 {
     void *new_data = realloc(map->data, sizeof(MapEntry) * new_capacity);
     if (!new_data)
@@ -105,7 +105,7 @@ static void decrease_capacity_if_needed(Map *map)
 /*
  Przesuwa elementy tablicy od miejsca `start` o `offest` elementów.
  */
-static void shift_array(Map *map, int start, int offset)
+static void shift_array(Map *map, const int start, const int offset)
 {
     memmove(
         &(map->data[start + offset]),
@@ -118,7 +118,7 @@ static void shift_array(Map *map, int start, int offset)
  Wyszukuje pozycję danego klucza, lub pozycję na którą należy go wstawić.
  Złożoność: O(nlogn)
  */
-static int find_position(const Map *map, wchar_t key)
+static int find_position(const Map *map, const wchar_t key)
 {
     int l = 0, r = map->size, mid = (l + r) / 2;
 
@@ -143,7 +143,7 @@ static int find_position(const Map *map, wchar_t key)
   @{
   */
 
-Map * map_new(void)
+Map * map_new()
 {
     Map *map = (Map *) malloc(sizeof(Map));
 
@@ -164,7 +164,7 @@ void map_done(Map *map) {
     free(map);
 }
 
-int map_insert(Map *map, wchar_t key, Node *val) {
+int map_insert(Map *map, const wchar_t key, Node *val) {
     increase_capacity_if_needed(map);
 
     int pos = find_position(map, key);
@@ -185,7 +185,7 @@ int map_insert(Map *map, wchar_t key, Node *val) {
     return 1;
 }
 
-int map_delete(Map *map, wchar_t key) {
+int map_delete(Map *map, const wchar_t key) {
     int pos = find_position(map, key);
 
     if (pos == map->size || (map->data[pos]).key != key)
@@ -207,7 +207,7 @@ int map_delete(Map *map, wchar_t key) {
     return 1;
 }
 
-Node * map_find(const Map *map, wchar_t key)
+Node * map_find(const Map *map, const wchar_t key)
 {
     int pos = find_position(map, key);
 
@@ -219,7 +219,7 @@ Node * map_find(const Map *map, wchar_t key)
     return (map->data[pos]).val;
 }
 
-Node * map_get_by_index(const Map *map, int index)
+Node * map_get_by_index(const Map *map, const int index)
 {
     if (index < 0 || index > map->size)
     {
