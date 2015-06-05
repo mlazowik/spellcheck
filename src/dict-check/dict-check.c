@@ -159,8 +159,12 @@ static void print_hints(FILE *stream, const int n_char, const int n_line,
                         const wchar_t *word)
 {
     struct word_list list;
+    wchar_t lowercase[wcslen(word)];
 
-    dictionary_hints(dict, word, &list);
+    wcscpy(lowercase, word);
+    make_lowercase(lowercase);
+
+    dictionary_hints(dict, lowercase, &list);
     const wchar_t * const *a = word_list_get(&list);
 
     fprintf(stream, "%d,%d %ls: ", n_line, n_char, word);
@@ -199,7 +203,7 @@ static void print_word(FILE *stream, const int n_char, const int n_line,
     if (!word_exists) fprintf(stream, "#");
     fprintf(stream, "%ls", word);
 
-    if (verbose && !word_exists) print_hints(stderr, n_char, n_line, lowercase);
+    if (verbose && !word_exists) print_hints(stderr, n_char, n_line, word);
 }
 
 /**
@@ -216,7 +220,7 @@ static void parse_input(FILE *stream)
         if (iswalpha(word[0]))
         {
             parse_word(stream, word+1);
-            print_word(stream, n_char, n_line, word);
+            print_word(stdout, n_char, n_line, word);
             n_char += wcslen(word);
         }
         else
@@ -229,7 +233,7 @@ static void parse_input(FILE *stream)
                 n_line++;
             }
 
-            fprintf(stream, "%lc", word[0]);
+            fprintf(stdout, "%lc", word[0]);
         }
     }
 
