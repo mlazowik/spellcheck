@@ -92,7 +92,7 @@ struct dictionary * dictionary_load(FILE* stream)
     struct dictionary *dict = dictionary_new();
 
     trie_done(dict->trie);
-    dict->trie = trie_load(stream);
+    dict->trie = trie;
 
     return dict;
 }
