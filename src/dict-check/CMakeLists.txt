@@ -2,4 +2,4 @@
 add_executable (dict-check dict-check.c)
 
 # przy kompilacji programu należy dołączyć bibliotekę
-target_link_libraries (dict-check dictionary)
+target_link_libraries (dict-check dictionary io)

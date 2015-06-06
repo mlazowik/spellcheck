@@ -10,6 +10,7 @@
   */
 
 #include "dictionary.h"
+#include "io.h"
 #include <stdbool.h>
 #include <locale.h>
 #include <stdio.h>
@@ -119,14 +120,13 @@ static void parse_args(int argc, char *argv[])
 
 /**
   Zapisuje słowo ze strumienia do `word`.
-  @param[in,out] stream Strumień do odczytu.
+  @param[in,out] io We/wy.
   @param[in,out] word Docelowe słowo.
   */
-static void parse_word(FILE *stream, wchar_t *word)
+static void parse_word(IO *io, wchar_t *word)
 {
     int i = 0;
-    wchar_t c;
-    while ((c = fgetwc(stream)) != WEOF && iswalpha(c))
+    while (io_peek_next(io) != WEOF && iswalpha(io_peek_next(io)))
     {
         if (i > MAX_WORD_LENGTH)
         {
@@ -134,29 +134,18 @@ static void parse_word(FILE *stream, wchar_t *word)
             exit(EXIT_FAILURE);
         }
 
-        word[i++] = c;
+        word[i++] = io_get_next(io);
     }
 
     word[i] = '\0';
-
-    if (ferror(stream))
-    {
-        fprintf(stderr, "Failed to read word\n");
-        exit(EXIT_FAILURE);
-    }
-
-    if (c != WEOF) ungetwc(c, stream);
 }
 
 /**
   Wypisuje podpowiedzi dla danego słowa.
-  @param[in,out] stream Strumień do zapisu.
-  @param[in] n_char Numer znaku w linii.
-  @param[in] n_line Numer linii.
+  @param[in,out] io We/wy.
   @param[in] word Słowo dla którego szukane są podpowiedzi.
   */
-static void print_hints(FILE *stream, const int n_char, const int n_line,
-                        const wchar_t *word)
+static void print_hints(IO *io, const wchar_t *word)
 {
     struct word_list list;
     wchar_t lowercase[wcslen(word)];
@@ -167,15 +156,17 @@ static void print_hints(FILE *stream, const int n_char, const int n_line,
     dictionary_hints(dict, lowercase, &list);
     const wchar_t * const *a = word_list_get(&list);
 
-    fprintf(stream, "%d,%d %ls: ", n_line, n_char, word);
+    size_t n_line = io_get_n_line(io);
+    size_t n_char = io_get_n_char(io) - wcslen(word);
+    io_eprintf(io, "%d,%d %ls: ", n_line, n_char, word);
 
     for (size_t i = 0; i < word_list_size(&list); i++)
     {
-        if (i > 0) fprintf(stream, " ");
-        fprintf(stream, "%ls", a[i]);
+        if (i > 0) io_eprintf(io, " ");
+        io_eprintf(io, "%ls", a[i]);
     }
 
-    fprintf(stream, "\n");
+    io_eprintf(io, "\n");
 
     word_list_done(&list);
 }
@@ -185,13 +176,10 @@ static void print_hints(FILE *stream, const int n_char, const int n_line,
 
   Jeśli użyta została opcja verbose a słowa nie ma w słowniku, wypisuje także
   podpowiedzi dla tego słowa.
-  @param[in,out] stream Strumień do zapisu.
-  @param[in] n_char Numer znaku w linii.
-  @param[in] n_line Numer linii.
+  @param[in,out] io We/wy.
   @param[in] word Słowo do wypisania.
   */
-static void print_word(FILE *stream, const int n_char, const int n_line,
-                       const wchar_t *word)
+static void print_word(IO *io, const wchar_t *word)
 {
     wchar_t lowercase[wcslen(word)];
 
@@ -200,49 +188,31 @@ static void print_word(FILE *stream, const int n_char, const int n_line,
 
     bool word_exists = dictionary_find(dict, lowercase);
 
-    if (!word_exists) fprintf(stream, "#");
-    fprintf(stream, "%ls", word);
+    if (!word_exists) io_printf(io, "#");
+    io_printf(io, "%ls", word);
 
-    if (verbose && !word_exists) print_hints(stderr, n_char, n_line, word);
+    if (verbose && !word_exists) print_hints(io, word);
 }
 
 /**
   Przetwarza wejście programu.
-  @param[in,out] stream Strumień do odczytu.
+  @param[in,out] io We/wy.
   */
-static void parse_input(FILE *stream)
+static void parse_input(IO *io)
 {
-    wchar_t c;
     wchar_t word[MAX_WORD_LENGTH+1];
 
-    int n_char = 1, n_line = 1;
-    while ((c = fgetwc(stream)) != WEOF)
+    while (io_peek_next(io) != WEOF)
     {
-        if (iswalpha(c))
+        if (iswalpha(io_peek_next(io)))
         {
-            ungetwc(c, stream);
-            parse_word(stream, word);
-            print_word(stdout, n_char, n_line, word);
-            n_char += wcslen(word);
+            parse_word(io, word);
+            print_word(io, word);
         }
         else
         {
-            n_char++;
-
-            if (c == L'\n')
-            {
-                n_char = 1;
-                n_line++;
-            }
-
-            fprintf(stdout, "%lc", c);
+            io_printf(io, "%lc", io_get_next(io));
         }
-    }
-
-    if (ferror(stream))
-    {
-        fprintf(stderr, "Failed to read word\n");
-        exit(EXIT_FAILURE);
     }
 }
 
@@ -257,9 +227,11 @@ int main(int argc, char *argv[])
     verbose = false;
     dict = NULL;
 
+    IO *io = io_new(stdin, stdout, stderr);
+
     parse_args(argc-1, argv+1);
 
-    parse_input(stdin);
+    parse_input(io);
 
     dictionary_done(dict);
 

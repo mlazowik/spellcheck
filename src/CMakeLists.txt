@@ -23,6 +23,7 @@ set(CMAKE_C_FLAGS_RELEASE "-std=gnu99 -O3")
 
 # wskazujemy na foldery, gdzie znajdują się pliki nagłówkowe.
 include_directories (dictionary)
+include_directories (io)
 
 # wskazujemy na foldery, gdzie znajdują się szczegółowe pliki CMakeLists.txt
 add_subdirectory (dictionary)
