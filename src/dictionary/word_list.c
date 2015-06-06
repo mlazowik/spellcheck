@@ -25,8 +25,9 @@
 
 /**
   Współczynnik przyrostu pamięci.
-  Więcej o jego wyborze:
-  https://github.com/facebook/folly/blob/master/folly/docs/FBVector.md#memory-handling
+  Więcej o jego wyborze [na githubie Facebooka][fb growth factor].
+
+  [fb growth factor]: https://github.com/facebook/folly/blob/master/folly/docs/FBVector.md#memory-handling)
   */
 #define GROWTH_FACTOR 1.5
 
