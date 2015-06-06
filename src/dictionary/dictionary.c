@@ -82,7 +82,12 @@ bool dictionary_find(const struct dictionary *dict, const wchar_t* word)
 int dictionary_save(const struct dictionary *dict, FILE* stream)
 {
     IO *io = io_new(stdin, stream, stderr);
-    return trie_save(dict->trie, io);
+
+    int ret = trie_save(dict->trie, io);
+
+    io_done(io);
+
+    return ret;
 }
 
 struct dictionary * dictionary_load(FILE* stream)
