@@ -39,6 +39,12 @@ IO * io_new();
 IO * io_new(FILE *in, FILE *out, FILE *err);
 
 /**
+  Destrukcja we/wy.
+  @param[in,out] io We/wy.
+  */
+void io_done(IO *io);
+
+/**
   Zwraca następny znak z wejścia.
   @param[in,out] io We/wy.
   */

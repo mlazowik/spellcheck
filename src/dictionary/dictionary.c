@@ -91,6 +91,8 @@ struct dictionary * dictionary_load(FILE* stream)
 
     Trie *trie = trie_load(io);
 
+    io_done(io);
+
     if (trie == NULL) return NULL;
 
     struct dictionary *dict = dictionary_new();

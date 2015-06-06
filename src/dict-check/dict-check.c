@@ -233,6 +233,8 @@ int main(int argc, char *argv[])
 
     parse_input(io);
 
+    io_done(io);
+
     dictionary_done(dict);
 
     return 0;
