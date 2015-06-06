@@ -13,6 +13,7 @@
 #include "trie.h"
 #include "map.h"
 #include "io.h"
+#include "conf.h"
 #include <stdio.h>
 #include <stdlib.h>
 
