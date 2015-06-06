@@ -86,24 +86,26 @@ wchar_t io_peek_next(IO *io)
     return c;
 }
 
-void io_printf(IO *io, const char *fmt, ...)
+int io_printf(IO *io, const char *fmt, ...)
 {
     va_list args;
+
     va_start(args, fmt);
-
-    vfprintf(io->out, fmt, args);
-
+    int ret = vfprintf(io->out, fmt, args);
     va_end(args);
+
+    return ret;
 }
 
-void io_eprintf(IO *io, const char *fmt, ...)
+int io_eprintf(IO *io, const char *fmt, ...)
 {
     va_list args;
+
     va_start(args, fmt);
-
-    vfprintf(io->err, fmt, args);
-
+    int ret = vfprintf(io->err, fmt, args);
     va_end(args);
+
+    return ret;
 }
 
 size_t io_get_n_char(IO *io)

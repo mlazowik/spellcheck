@@ -54,15 +54,17 @@ wchar_t io_peek_next(IO *io);
   Wypisuje na wyjście.
   @param[in] io We/wy.
   @param[in] fmt Format wyjścia.
+  @return <0 jeśli się nie udało
   */
-void io_printf(IO *io, const char *fmt, ...);
+int io_printf(IO *io, const char *fmt, ...);
 
 /**
- Wypisuje na wyjście błędów.
- @param[in] io We/wy.
- @param[in] fmt Format wyjścia.
- */
-void io_eprintf(IO *io, const char *fmt, ...);
+  Wypisuje na wyjście błędów.
+  @param[in] io We/wy.
+  @param[in] fmt Format wyjścia.
+  @return <0 jeśli się nie udało
+  */
+int io_eprintf(IO *io, const char *fmt, ...);
 
 /**
   Zwraca pozycję "kursora" w linii
