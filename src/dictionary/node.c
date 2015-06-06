@@ -223,16 +223,16 @@ void node_add_words_to_list(const Node *node, wchar_t *prefix,
     prefix[depth] = L'\0';
 }
 
-int node_save(const Node *node, FILE* stream)
+int node_save(const Node *node, IO *io)
 {
     for (int i = 0; i < node_children_count(node); i++)
     {
         Node *child = map_get_by_index(node->children, i);
 
-        if (fprintf(stream, "%lc", child->value) < 0) return -1;
-        if (node_is_word(child) && fprintf(stream, "%lc", L'*') < 0) return -1;
-        if (node_save(child, stream) < 0) return -1;
-        if (fprintf(stream, "%lc", L'^') < 0) return -1;
+        if (io_printf(io, "%lc", child->value) < 0) return -1;
+        if (node_is_word(child) && io_printf(io, "%lc", L'*') < 0) return -1;
+        if (node_save(child, io) < 0) return -1;
+        if (io_printf(io, "%lc", L'^') < 0) return -1;
     }
 
     return 0;

@@ -141,18 +141,18 @@ void trie_to_word_list(const Trie *trie, struct word_list *list)
     node_add_words_to_list(trie->root, prefix, 0, list);
 }
 
-int trie_save(const Trie *trie, FILE* stream)
+int trie_save(const Trie *trie, IO *io)
 {
-    return node_save(trie->root, stream);
+    return node_save(trie->root, io);
 }
 
-Trie * trie_load(FILE* stream)
+Trie * trie_load(IO *io)
 {
     Trie *trie = trie_new();
     Node *node = trie->root;
 
     wchar_t c;
-    while ((c = fgetwc(stream)) != WEOF)
+    while ((c = io_get_next(io)) != WEOF)
     {
         if (c == L'*')
         {
@@ -177,12 +177,6 @@ Trie * trie_load(FILE* stream)
             node_add_child(node, c);
             node = node_get_child(node, c);
         }
-    }
-
-    if (ferror(stream))
-    {
-        trie_done(trie);
-        return NULL;
     }
 
     return trie;

@@ -123,9 +123,9 @@ void node_add_words_to_list(const Node *node, wchar_t *prefix,
 /**
   Zapisuje poddrzewo danego węzła.
   @param[in] node Węzeł.
-  @param[in,out] stream Strumień, gdzie ma być zapisany węzeł.
+  @param[in,out] io We/wy.
   @return <0 jeśli operacja się nie powiedzie, 0 w p.p.
   */
-int node_save(const Node *node, FILE* stream);
+int node_save(const Node *node, IO *io);
 
 #endif /* __NODE_H__ */

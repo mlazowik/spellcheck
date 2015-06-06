@@ -12,6 +12,7 @@
 #include "dictionary.h"
 #include "trie.h"
 #include "map.h"
+#include "io.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -80,12 +81,15 @@ bool dictionary_find(const struct dictionary *dict, const wchar_t* word)
 
 int dictionary_save(const struct dictionary *dict, FILE* stream)
 {
-    return trie_save(dict->trie, stream);
+    IO *io = io_new(stdin, stream, stderr);
+    return trie_save(dict->trie, io);
 }
 
 struct dictionary * dictionary_load(FILE* stream)
 {
-    Trie *trie = trie_load(stream);
+    IO *io = io_new(stream, stdout, stderr);
+
+    Trie *trie = trie_load(io);
 
     if (trie == NULL) return NULL;
 

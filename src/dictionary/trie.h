@@ -14,6 +14,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "word_list.h"
+#include "io.h"
 
 /**
   Struktura przechowująca drzewo.
@@ -75,17 +76,17 @@ void trie_to_word_list(const Trie *trie, struct word_list *list);
 /**
   Zapisuje drzewo.
   @param[in] trie Drzewo.
-  @param[in,out] stream Strumień, gdzie ma być zapisane drzewo.
+  @param[in,out] io We/wy.
   @return <0 jeśli operacja się nie powiedzie, 0 w p.p.
- */
-int trie_save(const Trie *trie, FILE* stream);
+  */
+int trie_save(const Trie *trie, IO *io);
 
 /**
   Inicjuje i wczytuje drzewo.
   Drzewo to należy zniszczyć za pomocą trie_done().
-  @param[in,out] stream Strumień, skąd ma być wczytany drzewo.
+  @param[in,out] io We/wy.
   @return Nowe drzewo lub NULL, jeśli operacja się nie powiedzie.
- */
-Trie * trie_load(FILE* stream);
+  */
+Trie * trie_load(IO *io);
 
 #endif /* __TRIE_H__ */
