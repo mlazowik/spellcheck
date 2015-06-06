@@ -11,6 +11,7 @@
 #include "word_list.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stddef.h>
 
 /**
   Początkowa pojemność.
@@ -53,7 +54,7 @@ static void change_array_capacity(struct word_list *list,
 /*
  Aktualizuje wskaźniki na słowa w buforze.
  */
-static void update_word_pointers(struct word_list *list, const int delta)
+static void update_word_pointers(struct word_list *list, ptrdiff_t delta)
 {
     for (size_t i = 0; i < list->size; i++)
     {
