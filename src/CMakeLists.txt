@@ -26,6 +26,7 @@ include_directories (dictionary)
 
 # wskazujemy na foldery, gdzie znajdują się szczegółowe pliki CMakeLists.txt
 add_subdirectory (dictionary)
+add_subdirectory (io)
 add_subdirectory (dict-editor)
 add_subdirectory (dict-check)
 

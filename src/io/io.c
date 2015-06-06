@@ -1,0 +1,119 @@
+/** @file
+    Implementacja biblioteki obsługującej wejście i wyjście.
+
+    @ingroup io
+    @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
+    @copyright Uniwerstet Warszawski
+    @date 2015-06-06
+ */
+
+#include "io.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+
+/**
+  Struktura przechowująca we/wy.
+ */
+struct io
+{
+    /// Wejście
+    FILE *in;
+    /// Wyjście
+    FILE *out;
+    /// Wyjście błędów
+    FILE *err;
+
+    /// Numer znaku w linii
+    size_t n_char;
+    /// Numer linii
+    size_t n_line;
+};
+
+/** @name Elementy interfejsu 
+  @{
+  */
+
+IO * io_new(FILE *in, FILE *out, FILE *err)
+{
+    IO *io = (IO *) malloc(sizeof(IO));
+
+    io->in = in;
+    io->out = out;
+    io->err = err;
+
+    io->n_char = 1;
+    io->n_line = 1;
+
+    return io;
+}
+
+void io_done(IO *io)
+{
+    free(io);
+}
+
+wchar_t io_get_next(IO *io)
+{
+    wchar_t c = fgetwc(io->in);
+
+    io->n_char = io->n_char + 1;
+    if (c == L'\n')
+    {
+        io->n_char = 1;
+        io->n_line = io->n_line + 1;
+    }
+
+    if (ferror(io->in))
+    {
+        io_eprintf(io, "Failed to read\n");
+    }
+
+    return c;
+}
+
+wchar_t io_peek_next(IO *io)
+{
+    wchar_t c = fgetwc(io->in);
+
+    if (ferror(io->in))
+    {
+        io_eprintf(io, "Failed to read\n");
+    }
+
+    if (c != WEOF) ungetwc(c, io->in);
+
+    return c;
+}
+
+void io_printf(IO *io, const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    vfprintf(io->out, fmt, args);
+
+    va_end(args);
+}
+
+void io_eprintf(IO *io, const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    vfprintf(io->err, fmt, args);
+
+    va_end(args);
+}
+
+size_t io_get_n_char(IO *io)
+{
+    return io->n_char;
+}
+
+size_t io_get_n_line(IO *io)
+{
+    return io->n_line;
+}
+
+/**@}*/
