@@ -1,7 +1,8 @@
 *~
+/debug/
+/release/
 /build/
 /debug/
 /release/
 /xcode/
 /.vagrant
-/tests/
