@@ -23,8 +23,6 @@
 
 #define _GNU_SOURCE
 
-#define conc(str1,str2) #str1 "/" #str2
-
 /**
   Struktura przechowująca słownik.
  */
