@@ -186,8 +186,8 @@ int main(void)
         cmocka_unit_test(word_list_add_test),
         cmocka_unit_test(word_list_get_test),
         cmocka_unit_test(word_list_repeat_test),
-        cmocka_unit_test(word_list_sort_test),
         cmocka_unit_test(word_list_auto_resize_test),
+        cmocka_unit_test(word_list_sort_test),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
