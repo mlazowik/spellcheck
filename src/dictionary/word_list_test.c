@@ -17,26 +17,25 @@
 
 /**
   Napis testowy.
- */
+  */
 const wchar_t* test   = L"Test string";
 /**
   Napis testowy.
- */
+  */
 const wchar_t* first  = L"First string";
 /**
   Napis testowy.
- */
+  */
 const wchar_t* second = L"Second string";
 /**
   Napis testowy.
- */
+  */
 const wchar_t* third  = L"Third string";
 
 /**
   Testuje inicjalizację listy.
-
   @param state Środowisko testowe.
- */
+  */
 static void word_list_init_test(void** state)
 {
     struct word_list l;
@@ -47,9 +46,8 @@ static void word_list_init_test(void** state)
 
 /**
   Testuje dodawanie słowa do listy.
-
   @param state Środowisko testowe.
- */
+  */
 static void word_list_add_test(void** state)
 {
     struct word_list l;
@@ -62,10 +60,9 @@ static void word_list_add_test(void** state)
 
 /**
   Przygotowsuje środowisko testowe
-
   @param state Środowisko testowe.
   @return 0 jeśli się udało, -1 w p.p.
- */
+  */
 static int word_list_setup(void **state)
 {
     struct word_list *l = malloc(sizeof(struct word_list));
@@ -81,10 +78,9 @@ static int word_list_setup(void **state)
 
 /**
   Niszczy środowisko testwowe.
-
   @param state Środowisko testowe.
   @return 0 jeśli się udało, -1 w p.p
- */
+  */
 static int word_list_teardown(void **state)
 {
     struct word_list *l = *state;
@@ -95,9 +91,8 @@ static int word_list_teardown(void **state)
 
 /**
   Testuje pobieranie listy słów.
-
   @param state Środowisko testowe.
- */
+  */
 static void word_list_get_test(void** state)
 {
     struct word_list *l = *state;
@@ -108,9 +103,8 @@ static void word_list_get_test(void** state)
 
 /**
   Testuje wielokrotne włożenie tego samego słowa.
-
   @param state Środowisko testowe.
- */
+  */
 static void word_list_repeat_test(void** state)
 {
     struct word_list *l = *state;
@@ -120,8 +114,45 @@ static void word_list_repeat_test(void** state)
 }
 
 /**
+  Testuje sortowanie listy
+  @param state Środowisko testowe.
+  */
+static void word_list_sort_test(void **state)
+{
+    struct word_list *l = *state;
+    word_list_sort(l);
+    word_list_add(l, test);
+    word_list_sort(l);
+    assert_true(wcscmp(first, word_list_get(l)[0]) == 0);
+    assert_true(wcscmp(second, word_list_get(l)[1]) == 0);
+    assert_true(wcscmp(test, word_list_get(l)[2]) == 0);
+    assert_true(wcscmp(third, word_list_get(l)[3]) == 0);
+}
+
+/**
+  Testuje automatyczne zwiększanie pojemności listy.
+  Wstawia więcej słów niż początkowa pojemność.
+  @param state Środowisko testowe.
+  */
+static void word_list_auto_resize_test(void **state)
+{
+    struct word_list l;
+    word_list_init(&l);
+
+    for (size_t i = 0; i < MINIMAL_CAPACITY + 3; i++)
+    {
+        word_list_add(&l, test);
+    }
+
+    for (size_t i = 0; i < MINIMAL_CAPACITY + 3; i++)
+    {
+        assert_true(wcscmp(test, word_list_get(&l)[i]) == 0);
+    }
+}
+
+/**
   Główna funkcja uruchamiająca testy.
- */
+  */
 int main(void)
 {
     const struct CMUnitTest tests[] =
@@ -130,6 +161,8 @@ int main(void)
         cmocka_unit_test(word_list_add_test),
         cmocka_unit_test_setup_teardown(word_list_get_test, word_list_setup, word_list_teardown),
         cmocka_unit_test_setup_teardown(word_list_repeat_test, word_list_setup, word_list_teardown),
+        cmocka_unit_test_setup_teardown(word_list_sort_test, word_list_setup, word_list_teardown),
+        cmocka_unit_test(word_list_auto_resize_test),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
