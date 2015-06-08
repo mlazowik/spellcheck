@@ -9,7 +9,7 @@ target_link_libraries (dictionary io)
 
 if (CMOCKA)
     # dodajemy plik wykonywalny z testem    
-    add_executable (word_list_test word_list.c word_list_test.c)
+    add_executable (word_list_test word_list_test.c)
 
     # i linkujemy go z biblioteką do testowania
     target_link_libraries (word_list_test ${CMOCKA})

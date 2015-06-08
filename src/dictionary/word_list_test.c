@@ -13,7 +13,7 @@
 #include <setjmp.h>
 #include <stdlib.h>
 #include <cmocka.h>
-#include "word_list.h"
+#include "word_list.c"
 
 /**
   Napis testowy.
