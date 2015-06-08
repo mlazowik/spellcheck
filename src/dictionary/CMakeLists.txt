@@ -8,8 +8,13 @@ add_library (dictionary dictionary.c dictionary.h word_list.c word_list.h
 target_link_libraries (dictionary io)
 
 if (CMOCKA)
-    # dodajemy plik wykonywalny z testem    
+    # dodajemy plik wykonywalny z testem
     add_executable (word_list_test word_list_test.c)
+
+    set_target_properties (
+        word_list_test
+        PROPERTIES
+        COMPILE_DEFINITIONS UNIT_TESTING=1)
 
     # i linkujemy go z biblioteką do testowania
     target_link_libraries (word_list_test ${CMOCKA})

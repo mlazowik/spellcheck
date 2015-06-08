@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <cmocka.h>
 #include "word_list.c"
+#include "utils.h"
 
 /**
   Napis testowy.
@@ -95,10 +96,14 @@ static int word_list_teardown(void **state)
   */
 static void word_list_get_test(void** state)
 {
+    word_list_setup(state);
+
     struct word_list *l = *state;
     assert_true(wcscmp(first, word_list_get(l)[0]) == 0);
     assert_true(wcscmp(second, word_list_get(l)[1]) == 0);
     assert_true(wcscmp(third, word_list_get(l)[2]) == 0);
+
+    word_list_teardown(state);
 }
 
 /**
@@ -107,10 +112,14 @@ static void word_list_get_test(void** state)
   */
 static void word_list_repeat_test(void** state)
 {
+    word_list_setup(state);
+
     struct word_list *l = *state;
     word_list_add(l, third);
     assert_int_equal(word_list_size(l), 4);
     assert_true(wcscmp(third, word_list_get(l)[3]) == 0);
+
+    word_list_teardown(state);
 }
 
 /**
@@ -119,6 +128,8 @@ static void word_list_repeat_test(void** state)
   */
 static void word_list_sort_test(void **state)
 {
+    word_list_setup(state);
+
     struct word_list *l = *state;
     word_list_sort(l);
     word_list_add(l, test);
@@ -127,6 +138,8 @@ static void word_list_sort_test(void **state)
     assert_true(wcscmp(second, word_list_get(l)[1]) == 0);
     assert_true(wcscmp(test, word_list_get(l)[2]) == 0);
     assert_true(wcscmp(third, word_list_get(l)[3]) == 0);
+
+    word_list_teardown(state);
 }
 
 /**
@@ -148,6 +161,8 @@ static void word_list_auto_resize_test(void **state)
     {
         assert_true(wcscmp(test, word_list_get(&l)[i]) == 0);
     }
+
+    word_list_done(&l);
 }
 
 /**
@@ -159,9 +174,9 @@ int main(void)
     {
         cmocka_unit_test(word_list_init_test),
         cmocka_unit_test(word_list_add_test),
-        cmocka_unit_test_setup_teardown(word_list_get_test, word_list_setup, word_list_teardown),
-        cmocka_unit_test_setup_teardown(word_list_repeat_test, word_list_setup, word_list_teardown),
-        cmocka_unit_test_setup_teardown(word_list_sort_test, word_list_setup, word_list_teardown),
+        cmocka_unit_test(word_list_get_test),
+        cmocka_unit_test(word_list_repeat_test),
+        cmocka_unit_test(word_list_sort_test),
         cmocka_unit_test(word_list_auto_resize_test),
     };
 
