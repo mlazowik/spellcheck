@@ -1,3 +1,13 @@
+/** @file
+    Testy listy słów.
+
+    @ingroup dictionary
+    @author Tomasz Kociumaka <kociumaka@mimuw.edu.pl>>
+    @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
+    @copyright Uniwerstet Warszawski
+    @date 2015-06-08
+ */
+
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
@@ -5,11 +15,28 @@
 #include <cmocka.h>
 #include "word_list.h"
 
+/**
+  Napis testowy.
+ */
 const wchar_t* test   = L"Test string";
+/**
+  Napis testowy.
+ */
 const wchar_t* first  = L"First string";
+/**
+  Napis testowy.
+ */
 const wchar_t* second = L"Second string";
+/**
+  Napis testowy.
+ */
 const wchar_t* third  = L"Third string";
 
+/**
+  Testuje inicjalizację listy.
+
+  @param state Środowisko testowe.
+ */
 static void word_list_init_test(void** state)
 {
     struct word_list l;
@@ -18,6 +45,11 @@ static void word_list_init_test(void** state)
     word_list_done(&l);
 }
 
+/**
+  Testuje dodawanie słowa do listy.
+
+  @param state Środowisko testowe.
+ */
 static void word_list_add_test(void** state)
 {
     struct word_list l;
@@ -28,6 +60,12 @@ static void word_list_add_test(void** state)
     word_list_done(&l);
 }
 
+/**
+  Przygotowsuje środowisko testowe
+
+  @param state Środowisko testowe.
+  @return 0 jeśli się udało, -1 w p.p.
+ */
 static int word_list_setup(void **state)
 {
     struct word_list *l = malloc(sizeof(struct word_list));
@@ -41,6 +79,12 @@ static int word_list_setup(void **state)
     return 0;
 }
 
+/**
+  Niszczy środowisko testwowe.
+
+  @param state Środowisko testowe.
+  @return 0 jeśli się udało, -1 w p.p
+ */
 static int word_list_teardown(void **state)
 {
     struct word_list *l = *state;
@@ -49,6 +93,11 @@ static int word_list_teardown(void **state)
     return 0;
 }
 
+/**
+  Testuje pobieranie listy słów.
+
+  @param state Środowisko testowe.
+ */
 static void word_list_get_test(void** state)
 {
     struct word_list *l = *state;
@@ -57,6 +106,11 @@ static void word_list_get_test(void** state)
     assert_true(wcscmp(third, word_list_get(l)[2]) == 0);
 }
 
+/**
+  Testuje wielokrotne włożenie tego samego słowa.
+
+  @param state Środowisko testowe.
+ */
 static void word_list_repeat_test(void** state)
 {
     struct word_list *l = *state;
@@ -65,6 +119,9 @@ static void word_list_repeat_test(void** state)
     assert_true(wcscmp(third, word_list_get(l)[3]) == 0);
 }
 
+/**
+  Główna funkcja uruchamiająca testy.
+ */
 int main(void)
 {
     const struct CMUnitTest tests[] =
