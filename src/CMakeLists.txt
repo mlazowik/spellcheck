@@ -5,7 +5,7 @@
 cmake_minimum_required (VERSION 2.6)
 
 # nazwa projektu i język źródeł
-project (Spellcheck C)    
+project (Spellcheck C)
 
 enable_testing ()
 
@@ -28,7 +28,7 @@ if (NOT CMOCKA)
 endif (NOT CMOCKA)
 
 # ustawiamy flagi kompilacji w wersji debug i release
-set(CMAKE_C_FLAGS_DEBUG "-std=gnu99 -Wall -pedantic -g")
+set(CMAKE_C_FLAGS_DEBUG "-std=gnu99 -Wall -pedantic -g --coverage -fprofile-arcs -ftest-coverage")
 set(CMAKE_C_FLAGS_RELEASE "-std=gnu99 -O3")
 
 # wskazujemy na foldery, gdzie znajdują się pliki nagłówkowe.
@@ -61,3 +61,11 @@ if (DOXYGEN_FOUND)
             COMMENT "Generating API documentation with Doxygen"
             )
 endif (DOXYGEN_FOUND)
+
+# generowanie coverage
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+if (CMAKE_COMPILER_IS_GNUCC)
+	include(CodeCoverage)
+	setup_target_for_coverage(coverage ctest coverage)
+endif()
