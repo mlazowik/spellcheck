@@ -13,6 +13,7 @@
 #include <setjmp.h>
 #include <stdlib.h>
 #include <cmocka.h>
+#include <locale.h>
 #include "word_list.c"
 #include "utils.h"
 
@@ -128,18 +129,25 @@ static void word_list_repeat_test(void** state)
   */
 static void word_list_sort_test(void **state)
 {
-    word_list_setup(state);
+    wchar_t *words[] = {L"felin", L"fen", L"fin", L"féin", L"mein", L"tein"};
+    wchar_t *ordered[] = {L"féin", L"felin", L"fen", L"fin", L"mein", L"tein"};
+    struct word_list list;
 
-    struct word_list *l = *state;
-    word_list_sort(l);
-    word_list_add(l, test);
-    word_list_sort(l);
-    assert_true(wcscmp(first, word_list_get(l)[0]) == 0);
-    assert_true(wcscmp(second, word_list_get(l)[1]) == 0);
-    assert_true(wcscmp(test, word_list_get(l)[2]) == 0);
-    assert_true(wcscmp(third, word_list_get(l)[3]) == 0);
+    word_list_init(&list);
 
-    word_list_teardown(state);
+    for (size_t i = 0; i < 6; i++)
+    {
+        word_list_add(&list, words[i]);
+    }
+
+    word_list_sort(&list);
+
+    for (size_t i = 0; i < 6; i++)
+    {
+        assert_true(wcscmp(word_list_get(&list)[i], ordered[i]) == 0);
+    }
+
+    word_list_done(&list);
 }
 
 /**
@@ -170,6 +178,8 @@ static void word_list_auto_resize_test(void **state)
   */
 int main(void)
 {
+    setlocale(LC_ALL, "pl_PL.UTF-8");
+
     const struct CMUnitTest tests[] =
     {
         cmocka_unit_test(word_list_init_test),
