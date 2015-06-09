@@ -50,33 +50,6 @@ static void map_insert_test(void** state)
 }
 
 /**
-  Przygotowsuje środowisko testowe
-  @param state Środowisko testowe.
-  @return 0 jeśli się udało, -1 w p.p.
-  */
-static int map_setup(void **state)
-{
-    Node *nodes[] =
-    {
-        node_new(L'a'),
-        node_new(L'ą'),
-        node_new(L'ź'),
-        node_new(L'b'),
-    };
-
-    Map *map = map_new();
-
-    for (size_t i = 0; i < 4; i++)
-    {
-        map_insert(map, node_get_key(nodes[i]), nodes[i]);
-    }
-
-    *state = map;
-
-    return 0;
-}
-
-/**
   Testuje automatyczne rozszerzanie i zmniejszanie się mapy.
   @param state Środowisko testowe.
   */
@@ -106,6 +79,33 @@ static void map_auto_resize_test(void** state)
     assert_int_equal(map->capacity, MINIMAL_CAPACITY);
 
     map_done(map);
+}
+
+/**
+  Przygotowsuje środowisko testowe
+  @param state Środowisko testowe.
+  @return 0 jeśli się udało, -1 w p.p.
+  */
+static int map_setup(void **state)
+{
+    Node *nodes[] =
+    {
+        node_new(L'a'),
+        node_new(L'ą'),
+        node_new(L'ź'),
+        node_new(L'b'),
+    };
+
+    Map *map = map_new();
+
+    for (size_t i = 0; i < 4; i++)
+    {
+        map_insert(map, node_get_key(nodes[i]), nodes[i]);
+    }
+
+    *state = map;
+
+    return 0;
 }
 
 /**
