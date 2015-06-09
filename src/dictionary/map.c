@@ -222,7 +222,7 @@ Node * map_find(const Map *map, const wchar_t key)
 
 Node * map_get_by_index(const Map *map, const int index)
 {
-    if (index < 0 || index > map->size)
+    if (index < 0 || index >= map->size)
     {
         return NULL;
     }
