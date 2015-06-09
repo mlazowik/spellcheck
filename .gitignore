@@ -6,3 +6,5 @@
 /release/
 /xcode/
 /.vagrant
+*.sublime-project
+*.sublime-workspace
