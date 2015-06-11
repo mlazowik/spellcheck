@@ -16,6 +16,7 @@
 #include "node.c"
 #include "utils.h"
 
+/// Rozszerzenia GNU
 #define _GNU_SOURCE
 
 /**

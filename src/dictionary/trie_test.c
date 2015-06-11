@@ -16,6 +16,9 @@
 #include "trie.c"
 #include "utils.h"
 
+/// Rozszerzenia GNU
+#define _GNU_SOURCE
+
 /**
   Testuje inicjalizację drzewa.
   @param state Środowisko testowe.
@@ -165,6 +168,52 @@ static void trie_to_word_list_test(void** state)
 }
 
 /**
+  Testuje zapisywanie drzewa.
+  @param state Środowisko testowe.
+  */
+static void trie_save_test(void** state)
+{
+    Trie *trie = trie_new();
+
+    FILE *stream;
+    wchar_t *buf = NULL;
+    size_t len;
+
+    stream = open_wmemstream(&buf, &len);
+    if (stream == NULL)
+    {
+        fprintf(stderr, "Failed to open memory stream\n");
+        exit(EXIT_FAILURE);
+    }
+
+    IO *io = io_new(stdin, stream, stderr);
+
+    assert_true(trie_save(trie, io) == 0);
+    fseek(stream, 0, SEEK_SET);
+    fflush(stream);
+    assert_true(wcscmp(L"", buf) == 0);
+    fseek(stream, 0, SEEK_SET);
+
+    trie_insert_word(trie, L"ciupaga");
+    assert_true(trie_save(trie, io) == 0);
+    fflush(stream);
+    assert_true(wcscmp(L"ciupaga*^^^^^^^", buf) == 0);
+    fseek(stream, 0, SEEK_SET);
+
+    trie_delete_word(trie, L"ciupaga");
+    assert_true(trie_save(trie, io) == 0);
+    fflush(stream);
+    assert_true(wcscmp(L"", buf) == 0);
+
+    fclose(stream);
+    io_done(io);
+#   undef free
+    free(buf);
+#   define free(ptr) _test_free(ptr, __FILE__, __LINE__)
+    trie_done(trie);
+}
+
+/**
   Główna funkcja uruchamiająca testy.
   */
 int main(void)
@@ -178,6 +227,7 @@ int main(void)
         cmocka_unit_test(trie_delete_word_test),
         cmocka_unit_test(trie_get_hints_test),
         cmocka_unit_test(trie_to_word_list_test),
+        cmocka_unit_test(trie_save_test),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
