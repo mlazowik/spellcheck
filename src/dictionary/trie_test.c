@@ -83,6 +83,22 @@ static int trie_teardown(void **state)
 }
 
 /**
+  Testuje znajowanie słowa w drzewie.
+  @param state Środowisko testowe.
+  */
+static void trie_has_word_test(void** state)
+{
+    trie_setup(state);
+
+    Trie *trie = *state;
+
+    assert_true(trie_has_word(trie, L"wątły"));
+    assert_false(trie_has_word(trie, L"łódź"));
+
+    trie_teardown(state);
+}
+
+/**
   Testuje usuwanie z drzewa.
   @param state Środowisko testowe.
   */
