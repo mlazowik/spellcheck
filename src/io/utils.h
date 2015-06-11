@@ -1,45 +1,27 @@
-/*
- * Copyright 2008 Google Inc.
- * Copyright 2015 Tomasz Kociumaka
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/** @file
+  * Nagłówki pomocnicze testowania.
+  *
+  * @ingroup dictionary
+  * @copyright 2008 Google Inc.
+  * @copyright 2015 Tomasz Kociumaka
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  * http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
 
 #ifndef UTILS_H
 #define UTILS_H
 /* If this is being built for a unit test. */
 #ifdef UNIT_TESTING
-
-/* Redirect printf to a function in the test application so it's possible to
- * test the standard output. */
-#ifdef printf
-#undef printf
-#endif /* printf */
-extern int example_test_printf(const char *format, ...);
-#define printf example_test_printf
-
-extern void print_message(const char *format, ...);
-
-/* Redirect fprintf to a function in the test application so it's possible to
- * test error messages. */
-#ifdef fprintf
-#undef fprintf
-#endif /* fprintf */
-#define fprintf example_test_fprintf
-
-extern int example_test_fprintf(FILE * const file, const char *format, ...);
-
-
 
 
 /* Redirect assert to mock_assert() so assertions can be caught by cmocka. */
@@ -75,13 +57,6 @@ void _test_free(void* const ptr, const char* file, const int line);
 void* _test_malloc(const size_t size, const char* file, const int line);
 void* _test_realloc(void* const ptr, const size_t size, const char* file,
                     const int line);
-
-
-
-int example_main(int argc, char *argv[]);
-/* main is defined in the unit test so redefine name of the the main function
- * here. */
-#define main example_main
 
 /* All functions in this object need to be exposed to the test application,
  * so redefine static to nothing. */

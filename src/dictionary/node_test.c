@@ -19,6 +19,10 @@
 /// Rozszerzenia GNU
 #define _GNU_SOURCE
 
+/** @def free(ptr)
+    Podminia free na _test_free z cmocka
+  */
+
 /**
   Testuje inicjalizację węzła.
   @param state Środowisko testowe.
