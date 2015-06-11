@@ -17,7 +17,7 @@
 #include "utils.h"
 
 /**
-  Testuje inicjalizację mapy.
+  Testuje inicjalizację węzła.
   @param state Środowisko testowe.
   */
 static void node_init_test(void** state)
