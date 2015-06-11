@@ -16,6 +16,8 @@
 #include "node.c"
 #include "utils.h"
 
+#define _GNU_SOURCE
+
 /**
   Testuje inicjalizację węzła.
   @param state Środowisko testowe.
@@ -270,6 +272,41 @@ static void node_add_words_to_list_test(void** state)
 }
 
 /**
+  Testuje zapisywanie poddrzewa węzła.
+  @param state Środowisko testowe.
+  */
+static void node_save_test(void** state)
+{
+    node_setup(state);
+
+    Node *node = *state;
+    FILE *stream;
+    wchar_t *buf = NULL;
+    size_t len;
+
+    stream = open_wmemstream(&buf, &len);
+    if (stream == NULL)
+    {
+        fprintf(stderr, "Failed to open memory stream\n");
+        exit(EXIT_FAILURE);
+    }
+
+    IO *io = io_new(stdin, stream, stderr);
+
+    assert_true(node_save(node, io) == 0);
+
+    fclose(stream);
+
+    assert_true(wcscmp(L"b*b^x*^ą*^ć*^ź*^^xb*^x^ą*^ć*^ź*^^ą*b*^x*^ą^ć*^ź*^^ć*b*^x*^ą*^ć^ź*^^ź*b*^x*^ą*^ć*^ź^^", buf) == 0);
+
+    io_done(io);
+#   undef free
+    free(buf);
+#   define free(ptr) _test_free(ptr, __FILE__, __LINE__)
+    node_teardown(state);
+}
+
+/**
   Główna funkcja uruchamiająca testy.
   */
 int main(void)
@@ -287,6 +324,7 @@ int main(void)
         cmocka_unit_test(node_has_word_test),
         cmocka_unit_test(node_get_hints_test),
         cmocka_unit_test(node_add_words_to_list_test),
+        cmocka_unit_test(node_save_test)
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

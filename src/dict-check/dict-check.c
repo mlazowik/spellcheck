@@ -158,15 +158,15 @@ static void print_hints(IO *io, const wchar_t *word)
 
     size_t n_line = io_get_n_line(io);
     size_t n_char = io_get_n_char(io) - wcslen(word);
-    io_eprintf(io, "%d,%d %ls: ", n_line, n_char, word);
+    io_eprintf(io, L"%d,%d %ls: ", n_line, n_char, word);
 
     for (size_t i = 0; i < word_list_size(&list); i++)
     {
-        if (i > 0) io_eprintf(io, " ");
-        io_eprintf(io, "%ls", a[i]);
+        if (i > 0) io_eprintf(io, L" ");
+        io_eprintf(io, L"%ls", a[i]);
     }
 
-    io_eprintf(io, "\n");
+    io_eprintf(io, L"\n");
 
     word_list_done(&list);
 }
@@ -188,8 +188,8 @@ static void print_word(IO *io, const wchar_t *word)
 
     bool word_exists = dictionary_find(dict, lowercase);
 
-    if (!word_exists) io_printf(io, "#");
-    io_printf(io, "%ls", word);
+    if (!word_exists) io_printf(io, L"#");
+    io_printf(io, L"%ls", word);
 
     if (verbose && !word_exists) print_hints(io, word);
 }
@@ -211,7 +211,7 @@ static void parse_input(IO *io)
         }
         else
         {
-            io_printf(io, "%lc", io_get_next(io));
+            io_printf(io, L"%lc", io_get_next(io));
         }
     }
 }

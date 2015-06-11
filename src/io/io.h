@@ -1,9 +1,9 @@
 /** @defgroup io Moduł wejścia/wyjścia
     Biblioteka obsługująca wejście i wyjście.
   */
-/** @file 
+/** @file
     Interfejs biblioteki obsługującej wejście i wyjście.
-   
+
     @ingroup io
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
@@ -62,7 +62,7 @@ wchar_t io_peek_next(IO *io);
   @param[in] fmt Format wyjścia.
   @return <0 jeśli się nie udało
   */
-int io_printf(IO *io, const char *fmt, ...);
+int io_printf(IO *io, const wchar_t *fmt, ...);
 
 /**
   Wypisuje na wyjście błędów.
@@ -70,7 +70,7 @@ int io_printf(IO *io, const char *fmt, ...);
   @param[in] fmt Format wyjścia.
   @return <0 jeśli się nie udało
   */
-int io_eprintf(IO *io, const char *fmt, ...);
+int io_eprintf(IO *io, const wchar_t *fmt, ...);
 
 /**
   Zwraca pozycję "kursora" w linii

@@ -30,7 +30,7 @@ struct io
     size_t n_line;
 };
 
-/** @name Elementy interfejsu 
+/** @name Elementy interfejsu
   @{
   */
 
@@ -66,7 +66,7 @@ wchar_t io_get_next(IO *io)
 
     if (ferror(io->in))
     {
-        io_eprintf(io, "Failed to read\n");
+        io_eprintf(io, L"Failed to read\n");
     }
 
     return c;
@@ -78,7 +78,7 @@ wchar_t io_peek_next(IO *io)
 
     if (ferror(io->in))
     {
-        io_eprintf(io, "Failed to read\n");
+        io_eprintf(io, L"Failed to read\n");
     }
 
     if (c != WEOF) ungetwc(c, io->in);
@@ -86,23 +86,23 @@ wchar_t io_peek_next(IO *io)
     return c;
 }
 
-int io_printf(IO *io, const char *fmt, ...)
+int io_printf(IO *io, const wchar_t *fmt, ...)
 {
     va_list args;
 
     va_start(args, fmt);
-    int ret = vfprintf(io->out, fmt, args);
+    int ret = vfwprintf(io->out, fmt, args);
     va_end(args);
 
     return ret;
 }
 
-int io_eprintf(IO *io, const char *fmt, ...)
+int io_eprintf(IO *io, const wchar_t *fmt, ...)
 {
     va_list args;
 
     va_start(args, fmt);
-    int ret = vfprintf(io->err, fmt, args);
+    int ret = vfwprintf(io->err, fmt, args);
     va_end(args);
 
     return ret;

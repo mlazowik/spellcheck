@@ -229,10 +229,10 @@ int node_save(const Node *node, IO *io)
     {
         Node *child = map_get_by_index(node->children, i);
 
-        if (io_printf(io, "%lc", child->value) < 0) return -1;
-        if (node_is_word(child) && io_printf(io, "%lc", L'*') < 0) return -1;
+        if (io_printf(io, L"%lc", child->value) < 0) return -1;
+        if (node_is_word(child) && io_printf(io, L"%lc", L'*') < 0) return -1;
         if (node_save(child, io) < 0) return -1;
-        if (io_printf(io, "%lc", L'^') < 0) return -1;
+        if (io_printf(io, L"%lc", L'^') < 0) return -1;
     }
 
     return 0;
