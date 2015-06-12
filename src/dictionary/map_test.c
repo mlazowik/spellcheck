@@ -186,7 +186,7 @@ static void map_delete_test(void** state)
 }
 
 /**
-  Testuje pobieranie elementu z mapy wg. jego indeksu.
+  Testuje pobieranie elementu z mapy wg jego indeksu.
   Zarówno istniejącego jak i niestniejącego.
   @param state Środowisko testowe.
   */
@@ -204,7 +204,7 @@ static void map_get_by_index_test(void** state)
 }
 
 /**
-  Testuje wyszukiwanie elementu w mapie wg. klucza.
+  Testuje wyszukiwanie elementu w mapie wg klucza.
   Zarówno istniejącego jak i niestniejącego.
   @param state Środowisko testowe.
   */

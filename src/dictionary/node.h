@@ -51,7 +51,7 @@ void node_add_child(Node *node, const wchar_t character);
 Node * node_get_child(const Node *node, const wchar_t character);
 
 /**
-  Zwraca syna węzła o określonym znaku.
+  Zwraca ojca węzła.
   @param[in] node Węzeł.
   @return Wskaźnik na ojca lub NULL jeśli nie istnieje.
   */

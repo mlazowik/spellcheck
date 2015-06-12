@@ -182,7 +182,7 @@ static void dictionary_save_test(void** state)
 }
 
 /**
-  Mock for getting next wchar.
+  Atrapa pobierania kolejnego znaku z wejścia.
   */
 wint_t __wrap_io_get_next(IO *io)
 {

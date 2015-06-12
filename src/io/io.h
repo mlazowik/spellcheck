@@ -66,7 +66,7 @@ int io_printf(IO *io, const wchar_t *fmt, ...);
 
 /**
   Wypisuje na wyjście błędów.
-  @param[in] io We/wy.
+  @param[in,out] io We/wy.
   @param[in] fmt Format wyjścia.
   @return <0 jeśli się nie udało
   */

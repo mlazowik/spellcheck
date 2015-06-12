@@ -119,7 +119,7 @@ static void parse_args(int argc, char *argv[])
 }
 
 /**
-  Zapisuje słowo ze strumienia do `word`.
+  Wczytuje słowo do `word`.
   @param[in,out] io We/wy.
   @param[in,out] word Docelowe słowo.
   */
