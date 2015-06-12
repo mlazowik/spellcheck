@@ -62,10 +62,14 @@ if (DOXYGEN_FOUND)
             )
 endif (DOXYGEN_FOUND)
 
-# generowanie coverage
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+option (COVERAGE OFF)
 
-if (CMAKE_COMPILER_IS_GNUCC)
-	include(CodeCoverage)
-	setup_target_for_coverage(coverage ctest coverage)
-endif()
+if (COVERAGE)
+	# generowanie coverage
+	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+	if (CMAKE_COMPILER_IS_GNUCC)
+		include(CodeCoverage)
+		setup_target_for_coverage(coverage ctest coverage)
+	endif()
+endif (COVERAGE)
