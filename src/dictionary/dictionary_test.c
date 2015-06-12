@@ -16,6 +16,10 @@
 #include "dictionary.c"
 #include "utils.h"
 
+/** @def free(ptr)
+    Podminia free na _test_free z cmocka
+  */
+
 /**
   Testuje inicjalizację słownika.
   @param state Środowisko testowe.
