@@ -268,6 +268,9 @@ static void trie_load_test(void** state)
     push_word_to_io_mock(L"ciupagą*^^^^^^^");
     trie = trie_load(io);
     assert_true(trie_has_word(trie, L"ciupagą"));
+    assert_false(trie_has_word(trie, L"ciupaga"));
+    assert_false(trie_has_word(trie, L"ciupag"));
+    assert_false(trie_has_word(trie, L"ciupagąą"));
     trie_done(trie);
 
     // Próba dojścia wyżej niż korzeń
