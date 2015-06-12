@@ -82,6 +82,28 @@ static void map_auto_resize_test(void** state)
 }
 
 /**
+  Testuje wyszukiwanie pozycji dla znaku.
+  @param state Środowisko testowe.
+  */
+static void find_position_test(void** state)
+{
+    Map *map = map_new();
+
+    map_insert(map, L'ą', NULL);
+    assert_int_equal(find_position(map, L'a'), 0);
+    assert_int_equal(find_position(map, L'ą'), 0);
+    assert_int_equal(find_position(map, L'ć'), 1);
+
+    map_insert(map, L'a', NULL);
+    assert_int_equal(find_position(map, L'a'), 0);
+    assert_int_equal(find_position(map, L'b'), 1);
+    assert_int_equal(find_position(map, L'ą'), 1);
+    assert_int_equal(find_position(map, L'ć'), 2);
+
+    map_done(map);
+}
+
+/**
   Przygotowsuje środowisko testowe
   @param state Środowisko testowe.
   @return 0 jeśli się udało, -1 w p.p.
@@ -210,6 +232,7 @@ int main(void)
         cmocka_unit_test(map_init_test),
         cmocka_unit_test(map_insert_test),
         cmocka_unit_test(map_auto_resize_test),
+        cmocka_unit_test(find_position_test),
         cmocka_unit_test(map_insert_existing_test),
         cmocka_unit_test(map_delete_test),
         cmocka_unit_test(map_get_by_index_test),
