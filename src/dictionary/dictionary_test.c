@@ -146,6 +146,85 @@ static void dictionary_hints_test(void** state)
 }
 
 /**
+  Testuje zapisywanie słownika.
+  @param state Środowisko testowe.
+  */
+static void dictionary_save_test(void** state)
+{
+    struct dictionary *dict = dictionary_new();
+
+    FILE *stream;
+    wchar_t *buf = NULL;
+    size_t len;
+
+    stream = open_wmemstream(&buf, &len);
+    if (stream == NULL)
+    {
+        fprintf(stderr, "Failed to open memory stream\n");
+        exit(EXIT_FAILURE);
+    }
+
+    dictionary_insert(dict, L"ciupaga");
+    assert_true(dictionary_save(dict, stream) == 0);
+    fflush(stream);
+    assert_true(wcscmp(L"ciupaga*^^^^^^^", buf) == 0);
+    fseek(stream, 0, SEEK_SET);
+
+    fclose(stream);
+#   undef free
+    free(buf);
+#   define free(ptr) _test_free(ptr, __FILE__, __LINE__)
+    dictionary_done(dict);
+}
+
+/**
+  Mock for getting next wchar.
+  */
+wint_t __wrap_io_get_next(IO *io)
+{
+    return mock();
+}
+
+/**
+  Wstawia słowo do atrapy wejścia.
+  @param word Słowo
+  */
+static void push_word_to_io_mock(wchar_t *word)
+{
+    size_t len = wcslen(word);
+
+    for (size_t i = 0; i < len; i++)
+    {
+        will_return(__wrap_io_get_next, word[i]);
+    }
+
+    will_return(__wrap_io_get_next, WEOF);
+}
+
+/**
+  Usuwa pozostałe znaki z atrapy wejścia.
+  @param io We/wy, aby parametry atrapy się zgadzały.
+  */
+static void pop_remaining_chars(IO *io)
+{
+    while (__wrap_io_get_next(io) != WEOF);
+}
+
+/**
+  Testuje wczytywanie drzewa.
+  @param state Środowisko testowe.
+  */
+static void dictionary_load_test(void** state)
+{
+    struct dictionary *dict = NULL;
+
+    push_word_to_io_mock(L"ciupagą*^^^^^^^");
+    dict = dictionary_load(stdin);
+    assert_true(dictionary_find(dict, L"ciupagą"));
+    dictionary_done(dict);
+}
+
+/**
   Główna funkcja uruchamiająca testy.
   */
 int main(void)
@@ -159,6 +238,8 @@ int main(void)
         cmocka_unit_test(dictionary_find_test),
         cmocka_unit_test(dictionary_delete_test),
         cmocka_unit_test(dictionary_hints_test),
+        cmocka_unit_test(dictionary_save_test),
+        cmocka_unit_test(dictionary_load_test),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

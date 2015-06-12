@@ -24,14 +24,6 @@
   */
 
 /**
-  Mock for getting next wchar.
-  */
-wint_t __wrap_io_get_next(IO *io)
-{
-    return mock();
-}
-
-/**
   Testuje inicjalizację drzewa.
   @param state Środowisko testowe.
   */
@@ -226,6 +218,14 @@ static void trie_save_test(void** state)
 }
 
 /**
+  Mock for getting next wchar.
+  */
+wint_t __wrap_io_get_next(IO *io)
+{
+    return mock();
+}
+
+/**
   Wstawia słowo do atrapy wejścia.
   @param word Słowo
   */
@@ -243,11 +243,10 @@ static void push_word_to_io_mock(wchar_t *word)
 
 /**
   Usuwa pozostałe znaki z atrapy wejścia.
-  @param io We/wy, aby parametry atrapy się zgadzały.
   */
-static void pop_remaining_chars(IO *io)
+static void pop_remaining_chars()
 {
-    while (__wrap_io_get_next(io) != WEOF);
+    while (__wrap_io_get_next(NULL) != WEOF);
 }
 
 /**
@@ -280,7 +279,7 @@ static void trie_load_test(void** state)
     // Znaki spoza alfabetu
     push_word_to_io_mock(L"&*^");
     trie = trie_load(io);
-    pop_remaining_chars(io);
+    pop_remaining_chars();
     assert_null(trie);
 
     io_done(io);

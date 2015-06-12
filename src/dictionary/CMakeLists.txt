@@ -22,7 +22,7 @@ if (CMOCKA)
 	target_link_libraries (map_test dictionary ${CMOCKA})
     target_link_libraries (node_test dictionary ${CMOCKA})
     target_link_libraries (trie_test -Wl,--wrap=io_get_next dictionary ${CMOCKA})
-    target_link_libraries (dictionary_test dictionary ${CMOCKA})
+    target_link_libraries (dictionary_test -Wl,--wrap=io_get_next dictionary ${CMOCKA})
 
     # wreszcie deklarujemy, że są to testy
 	add_test (word_list_unit_test word_list_test)
