@@ -48,13 +48,13 @@ void io_done(IO *io);
   Zwraca następny znak z wejścia.
   @param[in,out] io We/wy.
   */
-wchar_t io_get_next(IO *io);
+wint_t io_get_next(IO *io);
 
 /**
   Zwraca następny znak z wejścia, ale go z niego nie zdejmuje.
   @param[in] io We/wy.
   */
-wchar_t io_peek_next(IO *io);
+wint_t io_peek_next(IO *io);
 
 /**
   Wypisuje na wyjście.

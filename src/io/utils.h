@@ -33,6 +33,22 @@
 void mock_assert(const int result, const char* expression, const char *file,
                  const int line);
 
+/* Redirect fgetwc to a function in the test application so it's possible to
+ * test the input. */
+#ifdef fgetwc
+#undef fgetwc
+#endif /* fgetwc */
+extern wint_t _test_fgetwc(FILE *stream);
+#define fgetwc _test_fgetwc
+
+/* Redirect ungetwc to a function in the test application so it's possible to
+ * test the input. */
+#ifdef ungetwc
+#undef ungetwc
+#endif /* ungetwc */
+extern wint_t _test_ungetwc(wint_t wc, FILE *stream);
+#define ungetwc _test_ungetwc
+
 /* Redirect calloc, free, malloc & realloc to test_*() so cmocka can
  * check for memory leaks. */
 #ifdef calloc

@@ -64,7 +64,7 @@ static FILE * open_dict_file(const char *lang, char *permissions)
 }
 
 /**@}*/
-/** @name Elementy interfejsu 
+/** @name Elementy interfejsu
   @{
   */
 struct dictionary * dictionary_new()

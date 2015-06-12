@@ -24,6 +24,14 @@
   */
 
 /**
+  Mock for getting next wchar.
+  */
+wint_t __wrap_io_get_next(IO *io)
+{
+    return mock();
+}
+
+/**
   Testuje inicjalizację drzewa.
   @param state Środowisko testowe.
   */
@@ -218,6 +226,67 @@ static void trie_save_test(void** state)
 }
 
 /**
+  Wstawia słowo do atrapy wejścia.
+  @param word Słowo
+  */
+static void push_word_to_io_mock(wchar_t *word)
+{
+    size_t len = wcslen(word);
+
+    for (size_t i = 0; i < len; i++)
+    {
+        will_return(__wrap_io_get_next, word[i]);
+    }
+
+    will_return(__wrap_io_get_next, WEOF);
+}
+
+/**
+  Usuwa pozostałe znaki z atrapy wejścia.
+  @param io We/wy, aby parametry atrapy się zgadzały.
+  */
+static void pop_remaining_chars(IO *io)
+{
+    while (__wrap_io_get_next(io) != WEOF);
+}
+
+/**
+  Testuje wczytywanie drzewa.
+  @param state Środowisko testowe.
+  */
+static void trie_load_test(void** state)
+{
+    Trie *trie = NULL;
+
+    IO *io = io_new(stdin, stdout, stderr);
+
+    push_word_to_io_mock(L"");
+    trie = trie_load(io);
+    assert_non_null(trie);
+    trie_done(trie);
+
+    // Poprawny zapis
+    push_word_to_io_mock(L"ciupagą*^^^^^^^");
+    trie = trie_load(io);
+    assert_true(trie_has_word(trie, L"ciupagą"));
+    trie_done(trie);
+
+    // Próba dojścia wyżej niż korzeń
+    push_word_to_io_mock(L"a*^^");
+    trie = trie_load(io);
+    pop_remaining_chars(io);
+    assert_null(trie);
+
+    // Znaki spoza alfabetu
+    push_word_to_io_mock(L"&*^");
+    trie = trie_load(io);
+    pop_remaining_chars(io);
+    assert_null(trie);
+
+    io_done(io);
+}
+
+/**
   Główna funkcja uruchamiająca testy.
   */
 int main(void)
@@ -232,6 +301,7 @@ int main(void)
         cmocka_unit_test(trie_get_hints_test),
         cmocka_unit_test(trie_to_word_list_test),
         cmocka_unit_test(trie_save_test),
+        cmocka_unit_test(trie_load_test),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

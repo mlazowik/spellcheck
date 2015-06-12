@@ -53,9 +53,9 @@ void io_done(IO *io)
     free(io);
 }
 
-wchar_t io_get_next(IO *io)
+wint_t io_get_next(IO *io)
 {
-    wchar_t c = fgetwc(io->in);
+    wint_t c = fgetwc(io->in);
 
     io->n_char = io->n_char + 1;
     if (c == L'\n')
@@ -72,9 +72,9 @@ wchar_t io_get_next(IO *io)
     return c;
 }
 
-wchar_t io_peek_next(IO *io)
+wint_t io_peek_next(IO *io)
 {
-    wchar_t c = fgetwc(io->in);
+    wint_t c = fgetwc(io->in);
 
     if (ferror(io->in))
     {

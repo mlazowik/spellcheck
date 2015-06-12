@@ -151,7 +151,8 @@ Trie * trie_load(IO *io)
     Trie *trie = trie_new();
     Node *node = trie->root;
 
-    wchar_t c;
+    wint_t c;
+
     while ((c = io_get_next(io)) != WEOF)
     {
         if (c == L'*')
