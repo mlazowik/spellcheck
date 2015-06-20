@@ -4,11 +4,11 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-06-05
+    @date 2015-06-19
  */
 
 #include "node.h"
-#include "map.h"
+#include "set.h"
 #include <stdlib.h>
 
 /**
@@ -24,12 +24,33 @@ struct node
     /// Rodzic węzła.
     Node *parent;
     /// Dzieci węzła.
-    Map *children;
+    Set *children;
 };
 
 /** @name Funkcje pomocnicze
   @{
   */
+
+/*
+ Porównuje dwa węzły
+ */
+static int compare_nodes(void *a, void *b)
+{
+    wchar_t _a = node_get_key(a);
+    wchar_t _b = node_get_key(b);
+
+    if (_a > _b) return 1;
+    if (_a == _b) return 0;
+    return -1;
+}
+
+/*
+ Destrukcja węzła na potrzeby seta.
+ */
+static void free_node(void *node)
+{
+    node_done((Node*)node);
+}
 
 /*
  Dodaje do listy istniejące słowa, które można uzyskać przez dodanie litery
@@ -40,7 +61,7 @@ static void get_hints_add(const Node *node, wchar_t *add, const size_t pos,
 {
     for (size_t j = 0; j < node_children_count(node); j++)
     {
-        Node *child = map_get_by_index(node->children, j);
+        Node *child = set_get_by_index(node->children, j);
         add[pos] = node_get_key(child);
 
         if (node_has_word(child, add + pos + 1))
@@ -59,7 +80,7 @@ static void get_hints_replace(const Node *node, wchar_t *replace,
 {
     for (size_t j = 0; j < node_children_count(node); j++)
     {
-        Node *child = map_get_by_index(node->children, j);
+        Node *child = set_get_by_index(node->children, j);
         replace[pos] = node_get_key(child);
 
         if (node_has_word(child, replace + pos + 1))
@@ -98,7 +119,7 @@ Node * node_new(const wchar_t character)
 
     node->value = character;
     node->parent = NULL;
-    node->children = map_new();
+    node->children = set_new(compare_nodes, free_node);
     node->is_word = false;
 
     return node;
@@ -108,10 +129,10 @@ void node_done(Node *node)
 {
     for (int i = 0; i < node_children_count(node); i++)
     {
-        node_done(map_get_by_index(node->children, i));
+        node_done(set_get_by_index(node->children, i));
     }
 
-    map_done(node->children);
+    set_done(node->children);
     free(node);
 }
 
@@ -119,7 +140,7 @@ void node_add_child(Node *node, const wchar_t character)
 {
     Node *child = node_new(character);
     child->parent = node;
-    if (!map_insert(node->children, character, child))
+    if (!set_insert(node->children, child))
     {
         node_done(child);
     }
@@ -127,7 +148,10 @@ void node_add_child(Node *node, const wchar_t character)
 
 Node * node_get_child(const Node *node, const wchar_t character)
 {
-    return map_find(node->children, character);
+    Node *tmp = node_new(character);
+    Node *ret = set_find(node->children, tmp);
+    node_done(tmp);
+    return ret;
 }
 
 Node * node_get_parent(const Node *node)
@@ -141,7 +165,10 @@ wchar_t node_get_key(const Node *node) {
 
 int node_remove_child(Node *node, const wchar_t character)
 {
-    return map_delete(node->children, character);
+    Node *tmp = node_new(character);
+    int ret = set_delete(node->children, tmp);
+    node_done(tmp);
+    return ret;
 }
 
 bool node_is_word(const Node *node)
@@ -156,7 +183,7 @@ void node_set_is_word(Node *node, const bool is_word)
 
 const int node_children_count(const Node *node)
 {
-    return map_size(node->children);
+    return set_size(node->children);
 }
 
 bool node_has_word(const Node *node, const wchar_t *word)
@@ -212,7 +239,7 @@ void node_add_words_to_list(const Node *node, wchar_t *prefix,
 
     for (size_t i = 0; i < node_children_count(node); i++)
     {
-        Node *child = map_get_by_index(node->children, i);
+        Node *child = set_get_by_index(node->children, i);
         prefix[depth] = node_get_key(child);
 
         if (node_is_word(child)) word_list_add(list, prefix);
@@ -227,7 +254,7 @@ int node_save(const Node *node, IO *io)
 {
     for (int i = 0; i < node_children_count(node); i++)
     {
-        Node *child = map_get_by_index(node->children, i);
+        Node *child = set_get_by_index(node->children, i);
 
         if (io_printf(io, L"%lc", child->value) < 0) return -1;
         if (node_is_word(child) && io_printf(io, L"%lc", L'*') < 0) return -1;

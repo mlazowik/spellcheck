@@ -6,12 +6,11 @@
     @author Jakub Pawlewicz <pan@mimuw.edu.pl>
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwerstet Warszawski
-    @date 2015-06-05
+    @date 2015-06-19
  */
 
 #include "dictionary.h"
 #include "trie.h"
-#include "map.h"
 #include "io.h"
 #include "conf.h"
 #include <stdio.h>
