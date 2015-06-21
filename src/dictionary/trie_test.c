@@ -299,6 +299,7 @@ int main(void)
     {
         cmocka_unit_test(trie_init_test),
         cmocka_unit_test(trie_insert_word_test),
+        cmocka_unit_test(trie_has_word_test),
         cmocka_unit_test(trie_delete_word_test),
         cmocka_unit_test(trie_get_hints_test),
         cmocka_unit_test(trie_to_word_list_test),
