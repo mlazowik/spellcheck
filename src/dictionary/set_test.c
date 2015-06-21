@@ -91,28 +91,28 @@ static void set_insert_test(void** state)
   */
 static void set_auto_resize_test(void** state)
 {
-    Set *set = set_new(compare_int, free_int);
-    int *numbers[MINIMAL_CAPACITY + 5];
+    const size_t big_size = 20;
 
-    for (size_t i = 0; i < MINIMAL_CAPACITY + 5; i++)
+    Set *set = set_new(compare_int, free_int);
+    int *numbers[big_size];
+
+    for (size_t i = 0; i < big_size; i++)
     {
         numbers[i] = int_new(i);
         set_insert(set, numbers[i]);
     }
 
-    assert_int_equal(set_size(set), MINIMAL_CAPACITY + 5);
+    assert_int_equal(set_size(set), big_size);
 
-    for (size_t i = 0; i < MINIMAL_CAPACITY + 5; i++)
+    for (size_t i = 0; i < big_size; i++)
     {
         assert_ptr_equal(set_get_by_index(set, i), numbers[i]);
     }
 
-    for (size_t i = 0; i < MINIMAL_CAPACITY + 5; i++)
+    for (size_t i = 0; i < big_size; i++)
     {
         set_delete(set, numbers[i]);
     }
-
-    assert_int_equal(set->capacity, MINIMAL_CAPACITY);
 
     set_done(set);
 }

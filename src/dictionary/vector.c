@@ -133,11 +133,6 @@ Vector * vector_new(vector_free_el_func free_el)
 }
 
 void vector_done(Vector *vector) {
-    for (size_t i = 0; i < vector->size; i++)
-    {
-        vector->free_el(vector->data[i]);
-    }
-
     free(vector->data);
     free(vector);
 }

@@ -68,6 +68,9 @@ static void vector_insert_test(void** state)
     assert_ptr_equal(vector_get_by_index(vector, 1), a);
     assert_ptr_equal(vector_get_by_index(vector, 2), c);
 
+    free_int(a);
+    free_int(b);
+    free_int(c);
     vector_done(vector);
 }
 
@@ -92,6 +95,9 @@ static void vector_push_back_test(void** state)
     assert_ptr_equal(vector_get_by_index(vector, 1), b);
     assert_ptr_equal(vector_get_by_index(vector, 2), c);
 
+    free_int(a);
+    free_int(b);
+    free_int(c);
     vector_done(vector);
 }
 
@@ -162,6 +168,8 @@ static int vector_setup(void **state)
 static int vector_teardown(void **state)
 {
     Vector *vector = *state;
+
+    while (vector->size > 0) vector_pop_back(vector);
 
     vector_done(vector);
 
