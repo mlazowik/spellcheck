@@ -8,6 +8,7 @@
  */
 
 #include "hints_generator.h"
+#include "node.h"
 #include "vector.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,6 +25,12 @@ struct hints_generator
     int max_cost;
     /// Reguły tworzenia podpowiedzi.
     Vector *rules;
+};
+
+struct state
+{
+    wchar_t *sufix;
+    Node *node;
 };
 
 /** @name Funkcje pomocnicze

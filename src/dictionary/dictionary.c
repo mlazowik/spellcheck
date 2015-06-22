@@ -224,4 +224,40 @@ void dictionary_rule_clear(struct dictionary *dict)
     hints_generator_rule_clear(dict->hints_generator);
 }
 
+int dictionary_rule_add(struct dictionary *dict,
+                        const wchar_t *left, const wchar_t *right,
+                        bool bidirectional,
+                        int cost,
+                        enum rule_flag flag)
+{
+    if (bidirectional)
+    {
+        int ret = 0;
+
+        if (dictionary_rule_add(dict, left, right, false, cost, flag) == 1)
+        {
+            ret++;
+        }
+
+        if (dictionary_rule_add(dict, right, left, false, cost, flag) == 1)
+        {
+            ret++;
+        }
+
+        if (ret == 0) return -1;
+        return ret;
+    }
+
+    Rule *rule = rule_new(left, right, cost, flag);
+    if (!rule_is_legal(rule))
+    {
+        rule_done(rule);
+        return -1;
+    }
+
+    hints_generator_rule_add(dict->hints_generator, rule);
+
+    return 1;
+}
+
 /**@}*/
