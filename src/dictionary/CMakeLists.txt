@@ -1,7 +1,8 @@
 # dodajemy bibliotekę dictionary, stworzoną na podstawie pliku dictionary.c
 # biblioteka będzie dołączana statycznie (czyli przez linkowanie pliku .o)
 
-add_library (dictionary dictionary.c rule.c word_list.c vector.c set.c node.c trie.c)
+add_library (dictionary dictionary.c rule.c word_list.c vector.c set.c node.c
+             trie.c hints_generator.c)
 
 # przy kompilacji programu należy dołączyć bibliotekę
 target_link_libraries (dictionary io)
@@ -25,7 +26,7 @@ if (CMOCKA)
     target_link_libraries (node_test dictionary ${CMOCKA})
     target_link_libraries (trie_test -Wl,--wrap=io_get_next dictionary ${CMOCKA})
     target_link_libraries (rule_test -Wl,--wrap=io_get_next dictionary ${CMOCKA})
-    target_link_libraries (dictionary_test -Wl,--wrap=io_get_next dictionary ${CMOCKA})
+    target_link_libraries (dictionary_test -Wl,--wrap=io_get_next,--wrap=io_peek_next dictionary ${CMOCKA})
 
     # wreszcie deklarujemy, że są to testy
     add_test (word_list_unit_test word_list_test)

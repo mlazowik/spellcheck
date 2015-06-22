@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwerstet Warszawski
-    @date 2015-06-11
+    @date 2015-06-22
  */
 
 #include <stdarg.h>
@@ -171,7 +171,7 @@ static void dictionary_save_test(void** state)
     dictionary_insert(dict, L"ciupaga");
     assert_true(dictionary_save(dict, stream) == 0);
     fflush(stream);
-    assert_true(wcscmp(L"ciupaga*^^^^^^^\n", buf) == 0);
+    assert_true(wcscmp(L"ciupaga*^^^^^^^\n0\n", buf) == 0);
     fseek(stream, 0, SEEK_SET);
 
     fclose(stream);
@@ -187,6 +187,20 @@ static void dictionary_save_test(void** state)
 wint_t __wrap_io_get_next(IO *io)
 {
     return mock();
+}
+
+/**
+  Atrapa podglądania kolejnego znaku z wejścia.
+  */
+wint_t __wrap_io_peek_next(IO *io)
+{
+    wint_t tmp[200];
+    int j = 0;
+    while ((tmp[j++] = __wrap_io_get_next(io)) != WEOF);
+
+    for (int i = 0; i < j; i++) will_return(__wrap_io_get_next, tmp[i]);
+
+    return tmp[0];
 }
 
 /**
@@ -209,9 +223,9 @@ static void push_word_to_io_mock(wchar_t *word)
   Usuwa pozostałe znaki z atrapy wejścia.
   @param io We/wy, aby parametry atrapy się zgadzały.
   */
-static void pop_remaining_chars(IO *io)
+static void pop_remaining_chars()
 {
-    while (__wrap_io_get_next(io) != WEOF);
+    while (__wrap_io_get_next(NULL) != WEOF);
 }
 
 /**
@@ -222,9 +236,12 @@ static void dictionary_load_test(void** state)
 {
     struct dictionary *dict = NULL;
 
-    push_word_to_io_mock(L"ciupagą*^^^^^^^");
+    push_word_to_io_mock(L"ciupagą*^^^^^^^\n13\na*b*3*2\n");
     dict = dictionary_load(stdin);
+    pop_remaining_chars();
+    assert_non_null(dict);
     assert_true(dictionary_find(dict, L"ciupagą"));
+    assert_int_equal(dictionary_hints_max_cost(dict, 2), 13);
     dictionary_done(dict);
 }
 

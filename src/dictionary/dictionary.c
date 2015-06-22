@@ -6,11 +6,12 @@
     @author Jakub Pawlewicz <pan@mimuw.edu.pl>
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwerstet Warszawski
-    @date 2015-06-19
+    @date 2015-06-22
  */
 
 #include "dictionary.h"
 #include "trie.h"
+#include "hints_generator.h"
 #include "io.h"
 #include "conf.h"
 #include <stdio.h>
@@ -29,6 +30,8 @@ struct dictionary
 {
     /// Drzewo
     Trie *trie;
+    /// Generator podpowiedzi.
+    Hints_Generator *hints_generator;
 };
 
 /** @name Funkcje pomocnicze
@@ -41,6 +44,7 @@ struct dictionary
 static void dictionary_free(struct dictionary *dict)
 {
     trie_done(dict->trie);
+    hints_generator_done(dict->hints_generator);
 }
 
 /*
@@ -77,6 +81,7 @@ struct dictionary * dictionary_new()
     }
 
     dict->trie = trie_new();
+    dict->hints_generator = hints_generator_new();
 
     return dict;
 }
@@ -107,6 +112,7 @@ int dictionary_save(const struct dictionary *dict, FILE* stream)
     IO *io = io_new(stdin, stream, stderr);
 
     int ret = trie_save(dict->trie, io);
+    if (ret == 0) ret = hints_generator_save(dict->hints_generator, io);
 
     io_done(io);
 
@@ -118,15 +124,23 @@ struct dictionary * dictionary_load(FILE* stream)
     IO *io = io_new(stream, stdout, stderr);
 
     Trie *trie = trie_load(io);
+    if (trie == NULL) return NULL;
+
+    Hints_Generator *generator = hints_generator_load(io);
+    if (generator == NULL)
+    {
+        trie_done(trie);
+        return NULL;
+    }
 
     io_done(io);
-
-    if (trie == NULL) return NULL;
 
     struct dictionary *dict = dictionary_new();
 
     trie_done(dict->trie);
+    hints_generator_done(dict->hints_generator);
     dict->trie = trie;
+    dict->hints_generator = generator;
 
     return dict;
 }
@@ -198,6 +212,16 @@ int dictionary_save_lang(const struct dictionary *dict, const char *lang)
     fclose(dict_file);
 
     return ret;
+}
+
+int dictionary_hints_max_cost(struct dictionary *dict, int new_cost)
+{
+    return hints_generator_max_cost(dict->hints_generator, new_cost);
+}
+
+void dictionary_rule_clear(struct dictionary *dict)
+{
+    hints_generator_rule_clear(dict->hints_generator);
 }
 
 /**@}*/

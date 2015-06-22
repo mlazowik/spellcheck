@@ -35,7 +35,7 @@ struct rule
 /*
  malloc opakowany w obsługę błedu
  */
-void * emalloc(size_t el_size)
+static void * emalloc(size_t el_size)
 {
     void *ret = malloc(el_size);
     if (!ret)
@@ -52,7 +52,7 @@ void * emalloc(size_t el_size)
  Potrzebne, bo iswdigit zależnie od locale może uznawać
  inne znaki niż dziesiętne.
  */
-bool is_decimal(wchar_t wc)
+static bool is_decimal(wchar_t wc)
 {
     wchar_t digits[] = {
         L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9'
@@ -66,7 +66,7 @@ bool is_decimal(wchar_t wc)
 /*
  Konwertuje znak na liczbę
  */
-int decimal_to_int(wchar_t wc)
+static int decimal_to_int(wchar_t wc)
 {
     return wc - L'0';
 }
@@ -75,7 +75,7 @@ int decimal_to_int(wchar_t wc)
  Zlicza liczbę (unikalnych) zmiennych występujących tylko
  po prawej stronie reguły.
  */
-int vars_only_in_right(Rule *rule)
+static int vars_only_in_right(Rule *rule)
 {
     bool var_present_in_left[10];
     bool var_present_in_right[10];
@@ -176,7 +176,7 @@ static wchar_t * read_rule_str(IO *io, wchar_t separator)
     return ret;
 }
 
-const int read_rule_int(IO *io, wchar_t separator)
+static const int read_rule_int(IO *io, wchar_t separator)
 {
     long int ret;
     wchar_t *last, *str;

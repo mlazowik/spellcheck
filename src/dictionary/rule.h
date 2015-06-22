@@ -11,6 +11,7 @@
 #define __RULE_H__
 
 #include "io.h"
+#include "dictionary.h"
 #include <stdbool.h>
 #include <wchar.h>
 
@@ -18,17 +19,6 @@
   Struktura przechowująca regułę.
   */
 typedef struct rule Rule;
-
-/**
-  Reprezentuje flagę przypisaną regule.
-  */
-enum rule_flag
-{
-    RULE_NORMAL, ///< Brak flagi.
-    RULE_BEGIN,  ///< Flaga b.
-    RULE_END,    ///< Flaga e.
-    RULE_SPLIT   ///< Flaga s.
-};
 
 /**
   Inicjalizacja reguły.
