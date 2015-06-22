@@ -143,7 +143,9 @@ void trie_to_word_list(const Trie *trie, struct word_list *list)
 
 int trie_save(const Trie *trie, IO *io)
 {
-    return node_save(trie->root, io);
+    int ret = node_save(trie->root, io);
+    if (io_printf(io, L"\n") < 0) return -1;
+    return ret;
 }
 
 Trie * trie_load(IO *io)
@@ -153,7 +155,7 @@ Trie * trie_load(IO *io)
 
     wint_t c;
 
-    while ((c = io_get_next(io)) != WEOF)
+    while ((c = io_get_next(io)) != L'\n' && c != WEOF)
     {
         if (c == L'*')
         {

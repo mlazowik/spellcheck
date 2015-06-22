@@ -171,7 +171,7 @@ static void dictionary_save_test(void** state)
     dictionary_insert(dict, L"ciupaga");
     assert_true(dictionary_save(dict, stream) == 0);
     fflush(stream);
-    assert_true(wcscmp(L"ciupaga*^^^^^^^", buf) == 0);
+    assert_true(wcscmp(L"ciupaga*^^^^^^^\n", buf) == 0);
     fseek(stream, 0, SEEK_SET);
 
     fclose(stream);

@@ -193,21 +193,20 @@ static void trie_save_test(void** state)
     IO *io = io_new(stdin, stream, stderr);
 
     assert_true(trie_save(trie, io) == 0);
-    fseek(stream, 0, SEEK_SET);
     fflush(stream);
-    assert_true(wcscmp(L"", buf) == 0);
+    assert_true(wcscmp(L"\n", buf) == 0);
     fseek(stream, 0, SEEK_SET);
 
     trie_insert_word(trie, L"ciupaga");
     assert_true(trie_save(trie, io) == 0);
     fflush(stream);
-    assert_true(wcscmp(L"ciupaga*^^^^^^^", buf) == 0);
+    assert_true(wcscmp(L"ciupaga*^^^^^^^\n", buf) == 0);
     fseek(stream, 0, SEEK_SET);
 
     trie_delete_word(trie, L"ciupaga");
     assert_true(trie_save(trie, io) == 0);
     fflush(stream);
-    assert_true(wcscmp(L"", buf) == 0);
+    assert_true(wcscmp(L"\n", buf) == 0);
 
     fclose(stream);
     io_done(io);
@@ -265,8 +264,9 @@ static void trie_load_test(void** state)
     trie_done(trie);
 
     // Poprawny zapis
-    push_word_to_io_mock(L"ciupagą*^^^^^^^");
+    push_word_to_io_mock(L"ciupagą*^^^^^^^\n");
     trie = trie_load(io);
+    pop_remaining_chars(io);
     assert_true(trie_has_word(trie, L"ciupagą"));
     assert_false(trie_has_word(trie, L"ciupaga"));
     assert_false(trie_has_word(trie, L"ciupag"));
@@ -274,13 +274,13 @@ static void trie_load_test(void** state)
     trie_done(trie);
 
     // Próba dojścia wyżej niż korzeń
-    push_word_to_io_mock(L"a*^^");
+    push_word_to_io_mock(L"a*^^\n");
     trie = trie_load(io);
     pop_remaining_chars(io);
     assert_null(trie);
 
     // Znaki spoza alfabetu
-    push_word_to_io_mock(L"&*^");
+    push_word_to_io_mock(L"&*^\n");
     trie = trie_load(io);
     pop_remaining_chars();
     assert_null(trie);
