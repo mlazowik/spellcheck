@@ -9,6 +9,7 @@
 
 #include "hints_generator.h"
 #include "node.h"
+#include "set.h"
 #include "vector.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,14 +25,19 @@ struct hints_generator
     /// Maksymalny koszt podpowiedzi.
     int max_cost;
     /// Reguły tworzenia podpowiedzi.
-    Vector *rules;
+    Vector *rules_by_cost;
+    /// Stany.
+    Set *states;
 };
 
 struct state
 {
     wchar_t *sufix;
-    Node *node;
+    Node *node, *prev;
+    int cost;
 };
+
+typedef struct state State;
 
 /** @name Funkcje pomocnicze
   @{
@@ -52,12 +58,33 @@ static void * emalloc(size_t el_size)
     return ret;
 }
 
+static State * state_new(wchar_t *sufix, Node *node)
+{
+    State *state = (State*) emalloc(sizeof(State));
+
+    state->node = node;
+    state->prev = NULL;
+    state->sufix = sufix;
+    state->cost = 0;
+
+    return state;
+}
+
 /*
  Usuwanie reguły na potrzeby wektora.
  */
 static void free_rule(void *rule)
 {
     rule_done(rule);
+}
+
+/*
+ Usuwanie wektora reguł na potrzeby wektora.
+ */
+static void free_vector(void *vector)
+{
+    vector_clear(vector);
+    vector_done(vector);
 }
 
 /*
@@ -95,16 +122,22 @@ Hints_Generator * hints_generator_new()
 
     generator = (Hints_Generator*) emalloc(sizeof(Hints_Generator));
     generator->max_cost = 0;
-    generator->rules = vector_new(free_rule);
+    generator->rules_by_cost = vector_new(free_vector);
+    generator->states = NULL;
 
     return generator;
 }
 
 void hints_generator_done(Hints_Generator *generator)
 {
-    vector_clear(generator->rules);
-    vector_done(generator->rules);
+    vector_clear(generator->rules_by_cost);
+    vector_done(generator->rules_by_cost);
     free(generator);
+}
+
+void hints_generator_hints(Hints_Generator *generator, Node *root,
+                           const wchar_t* word, struct word_list *list)
+{
 }
 
 int hints_generator_max_cost(Hints_Generator *generator, int new_cost)
@@ -116,22 +149,35 @@ int hints_generator_max_cost(Hints_Generator *generator, int new_cost)
 
 void hints_generator_rule_clear(Hints_Generator *generator)
 {
-    vector_clear(generator->rules);
+    vector_clear(generator->rules_by_cost);
 }
 
 void hints_generator_rule_add(Hints_Generator *generator, Rule *rule)
 {
-    vector_push_back(generator->rules, rule);
+    int cost = rule_get_cost(rule);
+
+    while (vector_size(generator->rules_by_cost) < cost + 1)
+    {
+        vector_push_back(generator->rules_by_cost, vector_new(free_rule));
+    }
+
+    Vector *cost_vector = vector_get_by_index(generator->rules_by_cost, cost);
+
+    vector_push_back(cost_vector, rule);
 }
 
 int hints_generator_save(const Hints_Generator *generator, IO *io)
 {
     if (io_printf(io, L"%d\n", generator->max_cost) < 0) return -1;
-    for (size_t i = 0; i < vector_size(generator->rules); i++)
+    for (size_t i = 0; i < vector_size(generator->rules_by_cost); i++)
     {
-        if (rule_save(vector_get_by_index(generator->rules, i), io) < 0)
+        Vector *cost_vector = vector_get_by_index(generator->rules_by_cost, i);
+        for (size_t j = 0; j < vector_size(cost_vector); j++)
         {
-            return -1;
+            if (rule_save(vector_get_by_index(cost_vector, j), io) < 0)
+            {
+                return -1;
+            }
         }
     }
 

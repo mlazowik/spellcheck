@@ -39,6 +39,13 @@ Rule * rule_new(const wchar_t *left, const wchar_t *right,
 void rule_done(Rule *rule);
 
 /**
+  Zwraca koszt reguły.
+  @param rule Reguła
+  @return Koszt reguły.
+  */
+int rule_get_cost(Rule *rule);
+
+/**
   Sprawdza, czy reguła sprłnia przyjęte założenia.
   @param[in] rule Reguła.
   @return Czy jest ok.

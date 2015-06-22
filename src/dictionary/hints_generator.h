@@ -12,6 +12,7 @@
 
 #include "rule.h"
 #include "node.h"
+#include "word_list.h"
 
 /**
   Struktura przechowująca regułę.
@@ -38,6 +39,18 @@ void hints_generator_done(Hints_Generator *generator);
   @return Zwraca dotychczasowy maksymalny koszt.
   */
 int hints_generator_max_cost(Hints_Generator *generator, int new_cost);
+
+/**
+  Tworzy możliwe podpowiedzi dla zadanego słowa.
+  Jeżeli pojedyncza podpowiedź składa się z kilku słów,
+  wtedy powinien być to jeden łańcuch znaków,
+  w którym słowa są pooddzielane pojedynczymi spacjami.
+  @param[in] generator Generator podpowiedzi.
+  @param[in] word Szukane słowo.
+  @param[in,out] list Lista, w której zostaną umieszczone podpowiedzi.
+  */
+void hints_generator_hints(Hints_Generator *generator, Node *root,
+                           const wchar_t* word, struct word_list *list);
 
 /**
   Usuwa wszystkie reguły.

@@ -228,6 +228,11 @@ void rule_done(Rule *rule) {
     free(rule);
 }
 
+int rule_get_cost(Rule *rule)
+{
+    return rule->cost;
+}
+
 bool rule_is_legal(Rule *rule)
 {
     if (vars_only_in_right(rule) > 1)
