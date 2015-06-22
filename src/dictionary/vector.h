@@ -62,6 +62,12 @@ void vector_push_back(Vector *vector, void *el);
 void vector_pop_back(Vector *vector);
 
 /**
+  Usuwa wszystkie el. wektora.
+  @param[in,out] vector Wektor.
+  */
+void vector_clear(Vector *vector);
+
+/**
   Zwraca element o danym indeksie z wektora.
   @param[in] vector Wektor.
   @param[in] index Indeks.

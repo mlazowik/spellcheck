@@ -169,8 +169,7 @@ static int vector_teardown(void **state)
 {
     Vector *vector = *state;
 
-    while (vector->size > 0) vector_pop_back(vector);
-
+    vector_clear(vector);
     vector_done(vector);
 
     return 0;

@@ -63,4 +63,12 @@ bool rule_is_legal(Rule *rule);
  */
 int rule_save(const Rule *rule, IO *io);
 
+/**
+  Inicjuje i wczytuje regułę.
+  Regułę tę należy zniszczyć za pomocą rule_done().
+  @param[in,out] io We/wy.
+  @return Nowa reguła lub NULL, jeśli operacja się nie powiedzie.
+  */
+Rule * rule_load(IO *io);
+
 #endif /* __RULE_H__ */

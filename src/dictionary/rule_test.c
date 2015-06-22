@@ -113,6 +113,96 @@ static void rule_save_test(void** state)
 }
 
 /**
+  Atrapa pobierania kolejnego znaku z wejścia.
+  */
+wint_t __wrap_io_get_next(IO *io)
+{
+    return mock();
+}
+
+/**
+  Wstawia słowo do atrapy wejścia.
+  @param word Słowo
+  */
+static void push_word_to_io_mock(wchar_t *word)
+{
+    size_t len = wcslen(word);
+
+    for (size_t i = 0; i < len; i++)
+    {
+        will_return(__wrap_io_get_next, word[i]);
+    }
+
+    will_return(__wrap_io_get_next, WEOF);
+}
+
+/**
+  Usuwa pozostałe znaki z atrapy wejścia.
+  @param io We/wy, aby parametry atrapy się zgadzały.
+  */
+static void pop_remaining_chars(IO *io)
+{
+    while (__wrap_io_get_next(io) != WEOF);
+}
+
+/**
+  Testuje wczytywanie reguły.
+  @param state Środowisko testowe.
+  */
+static void rule_load_test(void** state)
+{
+    Rule *rule = NULL;
+
+    IO *io = io_new(stdin, stdout, stderr);
+
+    push_word_to_io_mock(L"ąb1c1*1d112ęf2*2*0\n");
+    rule = rule_load(io);
+    pop_remaining_chars(io);
+
+    assert_non_null(rule);
+    assert_true(wcscmp(rule->left, L"ąb1c1") == 0);
+    assert_true(wcscmp(rule->right, L"1d112ęf2") == 0);
+    assert_int_equal(rule->cost, 2);
+    assert_true(rule->flag == RULE_NORMAL);
+
+    rule_done(rule);
+
+    push_word_to_io_mock(L"**2*3\n");
+    rule = rule_load(io);
+    pop_remaining_chars(io);
+
+    assert_non_null(rule);
+    assert_true(wcscmp(rule->left, L"") == 0);
+    assert_true(wcscmp(rule->right, L"") == 0);
+    assert_int_equal(rule->cost, 2);
+    assert_true(rule->flag == RULE_SPLIT);
+    assert_true(rule_is_legal(rule));
+
+    rule_done(rule);
+
+    push_word_to_io_mock(L"a*b*2*0*\n");
+    rule = rule_load(io);
+    pop_remaining_chars(io);
+    assert_null(rule);
+
+    push_word_to_io_mock(L"a*b*2*\n");
+    rule = rule_load(io);
+    pop_remaining_chars(io);
+    assert_null(rule);
+
+    push_word_to_io_mock(L"a*b*$*$\n");
+    rule = rule_load(io);
+    pop_remaining_chars(io);
+    assert_null(rule);
+
+    push_word_to_io_mock(L"*");
+    rule = rule_load(io);
+    assert_null(rule);
+
+    io_done(io);
+}
+
+/**
   Główna funkcja uruchamiająca testy.
   */
 int main(void)
@@ -124,6 +214,7 @@ int main(void)
         cmocka_unit_test(rule_init_test),
         cmocka_unit_test(rule_is_legal_test),
         cmocka_unit_test(rule_save_test),
+        cmocka_unit_test(rule_load_test),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

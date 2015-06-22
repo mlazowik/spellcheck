@@ -8,10 +8,12 @@
  */
 
 #include "rule.h"
+#include "vector.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
 
 /**
   Struktura przechowująca regułę.
@@ -113,6 +115,89 @@ int vars_only_in_right(Rule *rule)
     return only_in_right;
 }
 
+/**
+  Destrukcja inta.
+  @param el Wartość do usunięcia
+  */
+static void free_char(void *el)
+{
+    free(el);
+}
+
+/**
+  Tworzenie znaku
+  @param a Wartość którą ma przyjąć.
+  */
+static wchar_t * char_new(wchar_t a)
+{
+    int *ret = (wchar_t*) malloc(sizeof(wchar_t));
+    *ret = a;
+    return ret;
+}
+
+static wchar_t * char_vector_to_string(Vector *chars)
+{
+    wchar_t *str = malloc(sizeof(wchar_t) * (vector_size(chars) + 1));
+
+    for (size_t i = 0; i < vector_size(chars); i++)
+    {
+        str[i] = *(wchar_t*)vector_get_by_index(chars, i);
+    }
+
+    str[vector_size(chars)] = L'\0';
+
+    return str;
+}
+
+static wchar_t * read_rule_str(IO *io, wchar_t separator)
+{
+    wint_t c;
+    wchar_t *ret;
+
+    Vector *chars = vector_new(free_char);
+
+    while ((c = io_get_next(io)) != separator && c != WEOF)
+    {
+        vector_push_back(chars, char_new(c));
+    }
+
+    if (c == WEOF)
+    {
+        vector_clear(chars);
+        vector_done(chars);
+        return NULL;
+    }
+
+    ret = char_vector_to_string(chars);
+
+    vector_clear(chars);
+    vector_done(chars);
+
+    return ret;
+}
+
+const int read_rule_int(IO *io, wchar_t separator)
+{
+    long int ret;
+    wchar_t *last, *str;
+    bool is_zero, parsed_whole, out_of_range, parsing_failed, is_empty;
+
+    if (!(str = read_rule_str(io, separator))) return -1;
+    ret = wcstol(str, &last, 10);
+
+    is_empty = (wcslen(str) == 0);
+    is_zero = (str[0] == L'0' && str[1] == L'\0');
+    parsing_failed = (ret == 0 && !is_zero);
+    parsed_whole = (*last == '\0');
+    out_of_range = (ret < 0 || ret > INT_MAX || ret == LONG_MAX);
+
+    free(str);
+
+    if (!parsed_whole || out_of_range || parsing_failed || is_empty) return -1;
+
+    return ret;
+}
+
 /**@}*/
 /** @name Elementy interfejsu
   @{
@@ -166,6 +251,28 @@ int rule_save(const Rule *rule, IO *io)
     if (io_printf(io, L"%d\n", rule->flag) < 0) return -1;
 
     return 0;
+}
+
+Rule * rule_load(IO *io)
+{
+    Rule *rule = NULL;
+
+    wchar_t *left = NULL, *right = NULL;
+    int cost = 0;
+    enum rule_flag flag = 0;
+
+    if (!(left = read_rule_str(io, L'*'))) goto cleanup;
+    if (!(right = read_rule_str(io, L'*'))) goto cleanup;
+    if ((cost = read_rule_int(io, L'*')) == -1) goto cleanup;
+    if ((flag = read_rule_int(io, L'\n')) == -1) goto cleanup;
+
+    rule = rule_new(left, right, cost, flag);
+
+cleanup:
+    free(left);
+    free(right);
+
+    return rule;
 }
 
 /**@}*/

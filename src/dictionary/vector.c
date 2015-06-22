@@ -176,6 +176,11 @@ void vector_pop_back(Vector *vector)
     vector_delete(vector, vector->size - 1);
 }
 
+void vector_clear(Vector *vector)
+{
+    while (vector->size > 0) vector_pop_back(vector);
+}
+
 void * vector_get_by_index(const Vector *vector, const int index)
 {
     if (index < 0 || index >= vector->size)
