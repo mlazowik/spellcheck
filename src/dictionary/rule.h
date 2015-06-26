@@ -12,6 +12,8 @@
 
 #include "io.h"
 #include "dictionary.h"
+#include "vector.h"
+#include "state.h"
 #include <stdbool.h>
 #include <wchar.h>
 
@@ -44,6 +46,15 @@ void rule_done(Rule *rule);
   @return Koszt reguły.
   */
 int rule_get_cost(Rule *rule);
+
+/**
+  Stwierdza, czy reguła pasuje do prefiksu słowa.
+  @param word Słowo.
+  @return Czy reguła pasuje do prefiksu słowa.
+  */
+bool rule_matches_prefix(Rule *rule, bool is_start, const wchar_t *word);
+
+Vector * rule_apply(Rule *rule, State *state, Node *root);
 
 /**
   Sprawdza, czy reguła sprłnia przyjęte założenia.

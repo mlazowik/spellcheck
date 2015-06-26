@@ -9,6 +9,7 @@
 
 #include "rule.h"
 #include "vector.h"
+#include "node.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -26,6 +27,7 @@ struct rule
     size_t right_len;       ///< Długość prawej strony.
     int cost;               ///< Koszt reguły.
     enum rule_flag flag;    ///< Użyta flaga bądź jej brak.
+    wchar_t vars[10];       ///< Wartości zmiennych.
 };
 
 /** @name Funkcje pomocnicze
@@ -45,6 +47,14 @@ static void * emalloc(size_t el_size)
     }
 
     return ret;
+}
+
+/*
+ Łaszywe usuwanie.
+ */
+static void fake_free(void *state)
+{
+    return;
 }
 
 /*
@@ -116,7 +126,7 @@ static int vars_only_in_right(Rule *rule)
 }
 
 /**
-  Destrukcja inta.
+  Destrukcja znaku.
   @param el Wartość do usunięcia
   */
 static void free_char(void *el)
@@ -198,6 +208,81 @@ static const int read_rule_int(IO *io, wchar_t separator)
     return ret;
 }
 
+static bool set_vars(Rule *rule, const wchar_t *word)
+{
+    for (size_t i = 0; i < 10; i++) rule->vars[i] = L'\0';
+
+    for (size_t i = 0; i < rule->left_len; i++)
+    {
+        if (is_decimal(rule->left[i]))
+        {
+            int var = decimal_to_int(rule->left[i]);
+            if (rule->vars[var] == L'\0') rule->vars[var] = word[i];
+            else if (rule->vars[var] != word[i]) return false;
+        }
+        else
+        {
+            if (rule->left[i] != word[i]) return false;
+        }
+    }
+
+    return true;
+}
+
+static Vector * get_next_nodes(Rule *rule, Node *node)
+{
+    wchar_t right[rule->right_len];
+    int free_var = -1;
+    Vector *nodes = vector_new(fake_free);
+
+    for (size_t i = 0; i < rule->right_len; i++)
+    {
+        if (is_decimal(rule->right[i]))
+        {
+            int var = decimal_to_int(rule->right[i]);
+            if (rule->vars[var] == L'\0') free_var = var;
+            right[i] = rule->vars[i];
+        }
+        else
+        {
+            right[i] = rule->right[i];
+        }
+    }
+
+    int j = 0;
+    while (j < rule->right_len && !is_decimal(rule->right[j]))
+    {
+        node = node_get_child(node, right[j]);
+        if (node == NULL) return nodes;
+        j++;
+    }
+
+    if (free_var == -1)
+    {
+        vector_push_back(nodes, node);
+        return nodes;
+    }
+
+    for (size_t i = 0; i < node_children_count(node); i++)
+    {
+        Node *tmp = node_get_child_by_index(node, i);
+        rule->vars[free_var] = node_get_key(tmp);
+        tmp = node;
+
+        int k = j;
+        while (k < rule->right_len && tmp != NULL)
+        {
+            if (is_decimal(rule->right[k])) right[k] = rule->vars[free_var];
+            tmp = node_get_child(tmp, right[k]);
+            k++;
+        }
+
+        if (tmp != NULL) vector_push_back(nodes, tmp);
+    }
+
+    return nodes;
+}
+
 /**@}*/
 /** @name Elementy interfejsu
   @{
@@ -231,6 +316,64 @@ void rule_done(Rule *rule) {
 int rule_get_cost(Rule *rule)
 {
     return rule->cost;
+}
+
+bool rule_matches_prefix(Rule *rule, bool is_start, const wchar_t *word)
+{
+    int len = wcslen(word);
+
+    if (len < rule->left_len) return false;
+    if (rule->flag == RULE_END && len != rule->left_len) return false;
+    if (rule->flag == RULE_BEGIN && !is_start) return false;
+    if (rule->flag == RULE_SPLIT && (is_start || len == rule->left_len))
+    {
+        return false;
+    }
+
+    return set_vars(rule, word);
+}
+
+Vector * rule_apply(Rule *rule, State *state, Node *root)
+{
+    Vector *states = vector_new(fake_free);
+
+    if (rule->flag == RULE_SPLIT && state->prev != NULL) return states;
+
+    set_vars(rule, state->sufix);
+
+    Vector *nodes = get_next_nodes(rule, state->node);
+    for (size_t i = 0; i < vector_size(nodes); i++)
+    {
+        Node *node = vector_get_by_index(nodes, i);
+        State *new_state = state_new(node, state->prev,
+                                     state->sufix + rule->left_len,
+                                     state->cost + rule->cost,
+                                     state->sufix_len - rule->left_len,
+                                     (rule->flag != RULE_END));
+
+        if (rule->flag == RULE_SPLIT)
+        {
+            new_state->prev = new_state->node;
+            new_state->node = root;
+
+            if (node_is_word(new_state->prev))
+            {
+                vector_push_back(states, new_state);
+            }
+            else
+            {
+                state_done(new_state);
+            }
+        }
+        else
+        {
+            vector_push_back(states, new_state);
+        }
+    }
+
+    vector_done(nodes);
+
+    return states;
 }
 
 bool rule_is_legal(Rule *rule)

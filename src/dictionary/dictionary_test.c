@@ -123,33 +123,6 @@ static void dictionary_delete_test(void** state)
 }
 
 /**
-  Testuje podpowiedzi.
-  @param state Środowisko testowe.
-  */
-static void dictionary_hints_test(void** state)
-{
-    dictionary_setup(state);
-
-    struct dictionary *dict = *state;
-
-    size_t n_hints = 6;
-    wchar_t *hints_sorted[] = {L"féin", L"felin", L"fen", L"fin", L"mein", L"tein"};
-
-    struct word_list list;
-    word_list_init(&list);
-
-    dictionary_hints(dict, L"fein", &list);
-
-    assert_int_equal(word_list_size(&list), n_hints);
-    for (size_t i = 0; i < n_hints; i++)
-    {
-        assert_true(wcscmp(word_list_get(&list)[i], hints_sorted[i]) == 0);
-    }
-
-    dictionary_teardown(state);
-}
-
-/**
   Testuje zapisywanie słownika.
   @param state Środowisko testowe.
   */
@@ -258,7 +231,6 @@ int main(void)
         cmocka_unit_test(dictionary_insert_test),
         cmocka_unit_test(dictionary_find_test),
         cmocka_unit_test(dictionary_delete_test),
-        cmocka_unit_test(dictionary_hints_test),
         cmocka_unit_test(dictionary_save_test),
         cmocka_unit_test(dictionary_load_test),
     };

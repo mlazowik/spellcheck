@@ -187,41 +187,6 @@ static void node_has_word_test(void** state)
 }
 
 /**
-  Testuje wyszukiwanie podpowiedzi.
-  @param state Środowisko testowe.
-  */
-static void node_get_hints_test(void** state)
-{
-    node_setup(state);
-
-    Node *node = *state;
-    Trie *hints = trie_new();
-
-    node_get_hints(node, L"xą", hints);
-
-    assert_true(trie_has_word(hints, L"xą"));
-
-    assert_true(trie_has_word(hints, L"ą"));
-    assert_false(trie_has_word(hints, L"x"));
-
-    assert_true(trie_has_word(hints, L"xć"));
-    assert_true(trie_has_word(hints, L"ćą"));
-
-    trie_done(hints);
-    hints = trie_new();
-
-    node_get_hints(node, L"x", hints);
-
-    assert_true(trie_has_word(hints, L"ć"));
-    assert_true(trie_has_word(hints, L"xć"));
-    assert_false(trie_has_word(hints, L"x"));
-    assert_false(trie_has_word(hints, L"ćą"));
-
-    trie_done(hints);
-    node_teardown(state);
-}
-
-/**
   Testuje zapisanie słów do listy słów.
   @param state Środowisko testowe.
   */
@@ -327,7 +292,6 @@ int main(void)
         cmocka_unit_test(node_get_parent_test),
         cmocka_unit_test(node_remove_child_test),
         cmocka_unit_test(node_has_word_test),
-        cmocka_unit_test(node_get_hints_test),
         cmocka_unit_test(node_add_words_to_list_test),
         cmocka_unit_test(node_save_test)
     };

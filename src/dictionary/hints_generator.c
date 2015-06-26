@@ -1,5 +1,5 @@
 /** @file
-    Implementacja generatora podpowiedzi.
+    Implementacja gena podpowiedzi.
 
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
@@ -8,36 +8,36 @@
  */
 
 #include "hints_generator.h"
+#include "state.h"
 #include "node.h"
 #include "set.h"
 #include "vector.h"
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <assert.h>
 #include <limits.h>
 
 /**
-  Struktura przechowująca generator podpowiedzi.
+  Struktura przechowująca gen podpowiedzi.
   */
 struct hints_generator
 {
     /// Maksymalny koszt podpowiedzi.
     int max_cost;
+    /// Największy koszt wśród reguł.
+    int max_rule_cost;
+    /// Korzeń drzewa trie.
+    Node *root;
     /// Reguły tworzenia podpowiedzi.
-    Vector *rules_by_cost;
+    Vector *rules;
+    /// Reguły wg. kosztu i sufiksu do którego pasują.
+    Vector ***word_rules;
     /// Stany.
     Set *states;
 };
-
-struct state
-{
-    wchar_t *sufix;
-    Node *node, *prev;
-    int cost;
-};
-
-typedef struct state State;
 
 /** @name Funkcje pomocnicze
   @{
@@ -58,16 +58,60 @@ static void * emalloc(size_t el_size)
     return ret;
 }
 
-static State * state_new(wchar_t *sufix, Node *node)
+static int compare_state(void *_a, void *_b)
 {
-    State *state = (State*) emalloc(sizeof(State));
+    State *a = (State*) _a;
+    State *b = (State*) _b;
 
-    state->node = node;
-    state->prev = NULL;
-    state->sufix = sufix;
-    state->cost = 0;
+    if ((uintptr_t)a->node < (uintptr_t)b->node) return 1;
+    if ((uintptr_t)a->node > (uintptr_t)b->node) return -1;
 
-    return state;
+    if ((uintptr_t)a->sufix < (uintptr_t)b->sufix) return 1;
+    if ((uintptr_t)a->sufix > (uintptr_t)b->sufix) return -1;
+
+    if (!a->prev && b->prev) return 1;
+    if (a->prev && !b->prev) return -1;
+
+    if ((uintptr_t)a->prev < (uintptr_t)b->prev) return 1;
+    if ((uintptr_t)a->prev > (uintptr_t)b->prev) return -1;
+
+    if (a->expandable && !b->expandable) return 1;
+    if (!a->expandable && b->expandable) return -1;
+
+    return 0;
+}
+
+static int compare_hint_states(void *_a, void *_b)
+{
+    State *a = (State*) _a;
+    State *b = (State*) _b;
+
+    if ((uintptr_t)a->node < (uintptr_t)b->node) return 1;
+    if ((uintptr_t)a->node > (uintptr_t)b->node) return -1;
+
+    if (!a->prev && b->prev) return 1;
+    if (a->prev && !b->prev) return -1;
+
+    if ((uintptr_t)a->prev < (uintptr_t)b->prev) return 1;
+    if ((uintptr_t)a->prev > (uintptr_t)b->prev) return -1;
+
+    return 0;
+}
+
+static int compare_strings(void *_a, void *_b)
+{
+    wchar_t *a = (wchar_t*) _a;
+    wchar_t *b = (wchar_t*) _b;
+
+    return wcscoll(a, b);
+}
+
+/*
+ Usuwanie stanu na potrzeby wektora.
+ */
+static void free_state(void *state)
+{
+    state_done((State*)state);
 }
 
 /*
@@ -78,13 +122,182 @@ static void free_rule(void *rule)
     rule_done(rule);
 }
 
-/*
- Usuwanie wektora reguł na potrzeby wektora.
- */
-static void free_vector(void *vector)
+static void init_word_rules(Hints_Generator *gen, int word_len)
 {
-    vector_clear(vector);
-    vector_done(vector);
+    gen->word_rules = emalloc(sizeof(Vector**) * (gen->max_rule_cost + 1));
+
+    for (size_t i = 0; i <= gen->max_rule_cost; i++)
+    {
+        gen->word_rules[i] = emalloc(sizeof(Vector*) * (word_len + 1));
+        for (size_t j = 0; j <= word_len; j++)
+        {
+            gen->word_rules[i][j] = vector_new(free_rule);
+        }
+    }
+}
+
+static void match_rules_to_word(Hints_Generator *gen, const wchar_t *word)
+{
+    size_t len = wcslen(word);
+
+    for (size_t i = 0; i < vector_size(gen->rules); i++)
+    {
+        Rule *rule = vector_get_by_index(gen->rules, i);
+        for (size_t j = 0; j <= len; j++)
+        {
+            if (rule_matches_prefix(rule, (j == 0), word+j))
+            {
+                int cost = rule_get_cost(rule);
+                vector_push_back(gen->word_rules[cost][len-j], rule);
+            }
+        }
+    }
+}
+
+static void free_word_rules(Hints_Generator *gen, int word_len)
+{
+    for (size_t i = 0; i <= gen->max_rule_cost; i++)
+    {
+        for (size_t j = 0; j <= word_len; j++)
+        {
+            vector_done(gen->word_rules[i][j]);
+        }
+        free(gen->word_rules[i]);
+    }
+    free(gen->word_rules);
+}
+
+/*
+ Dodaje stan lub podmienia, jeśli lepszy koszt.
+ */
+static bool add_or_replace_state(Hints_Generator *gen, State *state)
+{
+    State *existing = set_find(gen->states, state);
+    if (existing != NULL)
+    {
+        if (existing->cost <= state->cost)
+        {
+            free(state);
+            return false;
+        }
+
+        set_delete(gen->states, state);
+    }
+
+    set_insert(gen->states, state);
+
+    return true;
+}
+
+/*
+ Dodaje stan i jego pochodne.
+ */
+static void add_extended_states(Hints_Generator *gen, State *state)
+{
+    if (!add_or_replace_state(gen, state)) return;
+
+    if (!state->expandable) return;
+
+    while (state->sufix_len > 0
+           && node_get_child(state->node, state->sufix[0]) != NULL)
+    {
+        Node *child = node_get_child(state->node, state->sufix[0]);
+        state = state_new(child, state->prev, state->sufix+1, state->cost,
+                          state->sufix_len-1, state->expandable);
+        if (!add_or_replace_state(gen, state)) return;
+    }
+}
+
+static void add_states(Hints_Generator *gen, int cost)
+{
+    Vector *states = vector_new(free_state);
+    for (size_t i = 0; i < set_size(gen->states); i++)
+    {
+        vector_push_back(states, set_get_by_index(gen->states, i));
+    }
+
+    for (size_t i = 0; i < vector_size(states); i++)
+    {
+        State *state = vector_get_by_index(states, i);
+        if (cost - state->cost <= gen->max_rule_cost)
+        {
+            Vector *rules = gen->word_rules[cost - state->cost][state->sufix_len];
+            for (size_t j = 0; j < vector_size(rules); j++)
+            {
+                Rule *rule = vector_get_by_index(rules, j);
+                Vector *new_states = rule_apply(rule, state, gen->root);
+                for (size_t k = 0; k < vector_size(new_states); k++)
+                {
+                    State *new_state = vector_get_by_index(new_states, k);
+                    add_extended_states(gen, new_state);
+                }
+                vector_done(new_states);
+            }
+        }
+    }
+
+    vector_done(states);
+}
+
+/*
+ Zlicza już znalezione podpowiedzi.
+ */
+static int count_hints(Hints_Generator *gen)
+{
+    Set *hint_states = set_new(compare_hint_states, free_state);
+
+    for (size_t i = 0; i < set_size(gen->states); i++)
+    {
+        State *state = set_get_by_index(gen->states, i);
+        if (node_is_word(state->node) && state->sufix[0] == L'\0')
+        {
+            set_insert(hint_states, state);
+        }
+    }
+
+    int ret = set_size(hint_states);
+    set_done(hint_states);
+
+    return ret;
+}
+
+static void get_hints(Hints_Generator *gen, struct word_list *list)
+{
+    Set *all_hints = set_new(compare_strings, free);
+    struct word_list *hints[gen->max_cost+1];
+    for (size_t i = 0; i <= gen->max_cost; i++)
+    {
+        hints[i] = emalloc(sizeof(struct word_list));
+        word_list_init(hints[i]);
+    }
+
+    for (size_t i = 0; i < set_size(gen->states); i++)
+    {
+        if (set_size(all_hints) < DICTIONARY_MAX_HINTS)
+        {
+            State *state = set_get_by_index(gen->states, i);
+            if (node_is_word(state->node) && state->sufix_len == 0)
+            {
+                wchar_t *hint = state_to_string(state);
+                if (!set_insert(all_hints, hint)) free(hint);
+                else word_list_add(hints[state->cost], hint);
+            }
+        }
+    }
+
+    for (size_t i = 0; i <= gen->max_cost; i++)
+    {
+        word_list_sort(hints[i]);
+        const wchar_t * const *a = word_list_get(hints[i]);
+        for (size_t j = 0; j < word_list_size(hints[i]); j++)
+        {
+            word_list_add(list, a[j]);
+        }
+        word_list_done(hints[i]);
+    }
+
+    set_clear(all_hints);
+    set_done(all_hints);
 }
 
 /*
@@ -118,66 +331,88 @@ static int decimal_to_int(wchar_t wc)
 
 Hints_Generator * hints_generator_new()
 {
-    Hints_Generator *generator;
+    Hints_Generator *gen;
 
-    generator = (Hints_Generator*) emalloc(sizeof(Hints_Generator));
-    generator->max_cost = 0;
-    generator->rules_by_cost = vector_new(free_vector);
-    generator->states = NULL;
+    gen = (Hints_Generator*) emalloc(sizeof(Hints_Generator));
+    gen->max_cost = 0;
+    gen->max_rule_cost = 0;
+    gen->root = NULL;
+    gen->rules = vector_new(free_rule);
+    gen->states = NULL;
 
-    return generator;
+    return gen;
 }
 
-void hints_generator_done(Hints_Generator *generator)
+void hints_generator_done(Hints_Generator *gen)
 {
-    vector_clear(generator->rules_by_cost);
-    vector_done(generator->rules_by_cost);
-    free(generator);
+    vector_clear(gen->rules);
+    vector_done(gen->rules);
+    free(gen);
 }
 
-void hints_generator_hints(Hints_Generator *generator, Node *root,
-                           const wchar_t* word, struct word_list *list)
+void hints_generator_set_root(Hints_Generator *gen, Node *root)
 {
+    gen->root = root;
 }
 
-int hints_generator_max_cost(Hints_Generator *generator, int new_cost)
+void hints_generator_hints(Hints_Generator *gen, const wchar_t* word,
+                           struct word_list *list)
 {
-    int old_cost = generator->max_cost;
-    generator->max_cost = new_cost;
+    int len = wcslen(word);
+    init_word_rules(gen, len);
+    match_rules_to_word(gen, word);
+
+    gen->states = set_new(compare_state, free_state);
+    add_extended_states(gen, state_new(gen->root, NULL, word, 0, len, true));
+
+    int k = 1;
+    while (count_hints(gen) < DICTIONARY_MAX_HINTS
+           && k <= gen->max_cost)
+    {
+        add_states(gen, k);
+        k++;
+    }
+
+    get_hints(gen, list);
+
+    set_clear(gen->states);
+    set_done(gen->states);
+
+    free_word_rules(gen, len);
+}
+
+int hints_generator_max_cost(Hints_Generator *gen, int new_cost)
+{
+    int old_cost = gen->max_cost;
+    gen->max_cost = new_cost;
     return old_cost;
 }
 
-void hints_generator_rule_clear(Hints_Generator *generator)
+void hints_generator_rule_clear(Hints_Generator *gen)
 {
-    vector_clear(generator->rules_by_cost);
+    vector_clear(gen->rules);
+
+    gen->max_rule_cost = 0;
 }
 
-void hints_generator_rule_add(Hints_Generator *generator, Rule *rule)
+void hints_generator_rule_add(Hints_Generator *gen, Rule *rule)
 {
-    int cost = rule_get_cost(rule);
+    vector_push_back(gen->rules, rule);
 
-    while (vector_size(generator->rules_by_cost) < cost + 1)
+    if (rule_get_cost(rule) > gen->max_rule_cost)
     {
-        vector_push_back(generator->rules_by_cost, vector_new(free_rule));
+        gen->max_rule_cost = rule_get_cost(rule);
     }
-
-    Vector *cost_vector = vector_get_by_index(generator->rules_by_cost, cost);
-
-    vector_push_back(cost_vector, rule);
 }
 
-int hints_generator_save(const Hints_Generator *generator, IO *io)
+int hints_generator_save(const Hints_Generator *gen, IO *io)
 {
-    if (io_printf(io, L"%d\n", generator->max_cost) < 0) return -1;
-    for (size_t i = 0; i < vector_size(generator->rules_by_cost); i++)
+    if (io_printf(io, L"%d\n", gen->max_cost) < 0) return -1;
+    for (size_t i = 0; i < vector_size(gen->rules); i++)
     {
-        Vector *cost_vector = vector_get_by_index(generator->rules_by_cost, i);
-        for (size_t j = 0; j < vector_size(cost_vector); j++)
+        if (rule_save(vector_get_by_index(gen->rules, i), io) < 0)
         {
-            if (rule_save(vector_get_by_index(cost_vector, j), io) < 0)
-            {
-                return -1;
-            }
+            return -1;
         }
     }
 
@@ -197,22 +432,21 @@ Hints_Generator * hints_generator_load(IO *io)
     }
     if (cost == -1) return NULL;
 
-    Hints_Generator *generator = hints_generator_new();
-    hints_generator_max_cost(generator, cost);
+    Hints_Generator *gen = hints_generator_new();
+    hints_generator_max_cost(gen, cost);
 
     while (io_peek_next(io) != WEOF)
     {
-        fprintf(stderr, "%lc\n", io_peek_next(io));
         Rule *rule = rule_load(io);
         if (!rule)
         {
-            hints_generator_done(generator);
+            hints_generator_done(gen);
             return NULL;
         }
-        hints_generator_rule_add(generator, rule);
+        hints_generator_rule_add(gen, rule);
     }
 
-    return generator;
+    return gen;
 }
 
 /**@}*/

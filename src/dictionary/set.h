@@ -36,6 +36,8 @@ Set * set_new(set_cmp_func cmp, set_free_el_func free_el);
   */
 void set_done(Set *set);
 
+void set_clear(Set *set);
+
 /**
   Dodaje element do zbioru.
   @param[in,out] set Zbiór.

@@ -82,6 +82,7 @@ struct dictionary * dictionary_new()
 
     dict->trie = trie_new();
     dict->hints_generator = hints_generator_new();
+    hints_generator_set_root(dict->hints_generator, trie_get_root(dict->trie));
 
     return dict;
 }
@@ -141,6 +142,7 @@ struct dictionary * dictionary_load(FILE* stream)
     hints_generator_done(dict->hints_generator);
     dict->trie = trie;
     dict->hints_generator = generator;
+    hints_generator_set_root(dict->hints_generator, trie_get_root(dict->trie));
 
     return dict;
 }
@@ -148,15 +150,9 @@ struct dictionary * dictionary_load(FILE* stream)
 void dictionary_hints(const struct dictionary *dict, const wchar_t* word,
                       struct word_list *list)
 {
-    Trie *hints = trie_new();
     word_list_init(list);
 
-    trie_get_hints(dict->trie, word, hints);
-    trie_to_word_list(hints, list);
-
-    trie_done(hints);
-
-    word_list_sort(list);
+    hints_generator_hints(dict->hints_generator, word, list);
 }
 
 int dictionary_lang_list(char **list, size_t *list_len)

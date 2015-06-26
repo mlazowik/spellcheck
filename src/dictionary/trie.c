@@ -71,6 +71,11 @@ Trie * trie_new()
     return trie;
 }
 
+Node *trie_get_root(Trie *trie)
+{
+    return trie->root;
+}
+
 void trie_done(Trie *trie)
 {
     node_done(trie->root);
@@ -128,11 +133,6 @@ int trie_delete_word(Trie *trie, const wchar_t *word)
 bool trie_has_word(const Trie *trie, const wchar_t *word)
 {
     return node_has_word(trie->root, word);
-}
-
-void trie_get_hints(const Trie *trie, const wchar_t *word, Trie *hints)
-{
-    node_get_hints(trie->root, word, hints);
 }
 
 void trie_to_word_list(const Trie *trie, struct word_list *list)

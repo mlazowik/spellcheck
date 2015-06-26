@@ -2,7 +2,7 @@
 # biblioteka będzie dołączana statycznie (czyli przez linkowanie pliku .o)
 
 add_library (dictionary dictionary.c rule.c word_list.c vector.c set.c node.c
-             trie.c hints_generator.c)
+             trie.c hints_generator.c state.c)
 
 # przy kompilacji programu należy dołączyć bibliotekę
 target_link_libraries (dictionary io)

@@ -75,6 +75,11 @@ void set_done(Set *set) {
     free(set);
 }
 
+void set_clear(Set *set)
+{
+    vector_clear(set->data);
+}
+
 int set_insert(Set *set, void *el) {
     int pos = find_position(set, el);
     if (pos < set_size(set) && set->cmp(set_get_by_index(set, pos), el) == 0)

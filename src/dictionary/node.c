@@ -52,57 +52,6 @@ static void free_node(void *node)
     node_done((Node*)node);
 }
 
-/*
- Dodaje do listy istniejące słowa, które można uzyskać przez dodanie litery
- przed pozycją pos.
- */
-static void get_hints_add(const Node *node, wchar_t *add, const size_t pos,
-                          Trie *hints)
-{
-    for (size_t j = 0; j < node_children_count(node); j++)
-    {
-        Node *child = set_get_by_index(node->children, j);
-        add[pos] = node_get_key(child);
-
-        if (node_has_word(child, add + pos + 1))
-        {
-            trie_insert_word(hints, add);
-        }
-    }
-}
-
-/*
- Dodaje do listy istniejące słowa, które można uzyskać przez zamianę litery
- na pozycji pos.
- */
-static void get_hints_replace(const Node *node, wchar_t *replace,
-                              const size_t pos, Trie *hints)
-{
-    for (size_t j = 0; j < node_children_count(node); j++)
-    {
-        Node *child = set_get_by_index(node->children, j);
-        replace[pos] = node_get_key(child);
-
-        if (node_has_word(child, replace + pos + 1))
-        {
-            trie_insert_word(hints, replace);
-        }
-    }
-}
-
-/*
- Dodaje do listy istniejące słowa, które można uzyskać przez usunięcie litery
- z pozycji pos.
- */
-static void get_hints_remove(const Node *node, const wchar_t *remove,
-                             const size_t pos, Trie *hints)
-{
-    if (node_has_word(node, remove + pos))
-    {
-        trie_insert_word(hints, remove);
-    }
-}
-
 /**@}*/
 /** @name Elementy interfejsu
   @{
@@ -186,6 +135,11 @@ const int node_children_count(const Node *node)
     return set_size(node->children);
 }
 
+Node * node_get_child_by_index(const Node *node, const int index)
+{
+    return set_get_by_index(node->children, index);
+}
+
 bool node_has_word(const Node *node, const wchar_t *word)
 {
     size_t word_length = wcslen(word);
@@ -200,36 +154,6 @@ bool node_has_word(const Node *node, const wchar_t *word)
     }
 
     return node_is_word(node);
-}
-
-void node_get_hints(const Node *node, const wchar_t *word, Trie *hints)
-{
-    size_t len = wcslen(word);
-
-    wchar_t remove[len], replace[len+1], add[len+2];
-    wcscpy(remove, word+1);
-    wcscpy(replace, word);
-    wcscpy(add+1, word);
-
-    get_hints_add(node, add, 0, hints);
-
-    for (size_t i = 0; i < len; i++)
-    {
-        if (i > 0) remove[i-1] = word[i-1];
-        get_hints_remove(node, remove, i, hints);
-
-        get_hints_replace(node, replace, i, hints);
-        replace[i] = word[i];
-
-        node = node_get_child(node, word[i]);
-        if (node == NULL)
-        {
-            return;
-        }
-
-        add[i] = add[i+1];
-        get_hints_add(node, add, i+1, hints);
-    }
 }
 
 void node_add_words_to_list(const Node *node, wchar_t *prefix,

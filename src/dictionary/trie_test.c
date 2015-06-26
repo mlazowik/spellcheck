@@ -129,24 +129,6 @@ static void trie_delete_word_test(void** state)
 }
 
 /**
-  Testuje podpowiedzi.
-  @param state Środowisko testowe.
-  */
-static void trie_get_hints_test(void** state)
-{
-    trie_setup(state);
-
-    Trie *trie = *state;
-
-    Trie *hints = trie_new();
-    trie_get_hints(trie, L"wątly", hints);
-    assert_true(trie_has_word(hints, L"wątły"));
-
-    trie_done(hints);
-    trie_teardown(state);
-}
-
-/**
   Testuje zapisyanie do listy słów.
   @param state Środowisko testowe.
   */
@@ -301,7 +283,6 @@ int main(void)
         cmocka_unit_test(trie_insert_word_test),
         cmocka_unit_test(trie_has_word_test),
         cmocka_unit_test(trie_delete_word_test),
-        cmocka_unit_test(trie_get_hints_test),
         cmocka_unit_test(trie_to_word_list_test),
         cmocka_unit_test(trie_save_test),
         cmocka_unit_test(trie_load_test),

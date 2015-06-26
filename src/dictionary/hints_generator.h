@@ -32,6 +32,8 @@ Hints_Generator * hints_generator_new();
   */
 void hints_generator_done(Hints_Generator *generator);
 
+void hints_generator_set_root(Hints_Generator *gen, Node *root);
+
 /**
   Ustawia maksymalny koszt z jakim jest generowana podpowiedź.
   @param[in,out] hints_generator Generator podpowiedzi..
@@ -49,8 +51,8 @@ int hints_generator_max_cost(Hints_Generator *generator, int new_cost);
   @param[in] word Szukane słowo.
   @param[in,out] list Lista, w której zostaną umieszczone podpowiedzi.
   */
-void hints_generator_hints(Hints_Generator *generator, Node *root,
-                           const wchar_t* word, struct word_list *list);
+void hints_generator_hints(Hints_Generator *generator, const wchar_t* word,
+                           struct word_list *list);
 
 /**
   Usuwa wszystkie reguły.

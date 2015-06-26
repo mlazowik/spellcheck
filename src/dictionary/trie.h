@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include "word_list.h"
 #include "io.h"
+#include "node.h"
 
 /**
   Struktura przechowująca drzewo.
@@ -33,6 +34,8 @@ Trie * trie_new();
   @param[in,out] trie Drzewo.
   */
 void trie_done(Trie *trie);
+
+Node *trie_get_root(Trie *trie);
 
 /**
   Wstawia słowo do drzewa.
@@ -57,14 +60,6 @@ int trie_delete_word(Trie *trie, const wchar_t *word);
   @return Wartość logiczna określająca czy słowo istnieje.
   */
 bool trie_has_word(const Trie *trie, const wchar_t *word);
-
-/**
-  Dodaje podpowiedzi dla danego słowa do drzewa podpowiedzi.
-  @param[in] trie Węzeł.
-  @param[in] word Sprawdzane słowo.
-  @param[in,out] hints Drzewo podpowiedzi.
-  */
-void trie_get_hints(const Trie *trie, const wchar_t *word, Trie *hints);
 
 /**
   Zwraca listę słów zapisanych w drzewie.
