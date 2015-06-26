@@ -344,7 +344,7 @@ Vector * rule_apply(Rule *rule, State *state, Node *root)
 {
     Vector *states = vector_new(fake_free);
 
-    if (rule->flag == RULE_BEGIN && (!state->prev && state->node != root))
+    if (rule->flag == RULE_BEGIN && (state->prev || state->node != root))
     {
         return states;
     }

@@ -25,7 +25,7 @@ struct state
 };
 
 State * state_new(Node *node, Node *prev, const wchar_t *sufix, int cost,
-                         int prefix_len, bool expandable);
+                         int sufix_len, bool expandable);
 
 void state_done(State *state);
 
