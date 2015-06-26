@@ -350,7 +350,9 @@ Vector * rule_apply(Rule *rule, State *state, Node *root)
         return states;
     }
 
-    if (rule->flag == RULE_SPLIT && (!state->prev && state->node == root))
+    if (rule->flag == RULE_SPLIT
+        && rule->left_len == 0
+        && (!state->prev && state->node == root))
     {
         return states;
     }
