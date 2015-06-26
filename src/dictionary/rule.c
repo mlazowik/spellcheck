@@ -337,6 +337,8 @@ bool rule_matches_prefix(Rule *rule, bool is_start, const wchar_t *word)
 
     if (len < rule->left_len) return false;
 
+    if (rule->flag == RULE_BEGIN && !is_start) return false;
+
     return set_vars(rule, word);
 }
 
