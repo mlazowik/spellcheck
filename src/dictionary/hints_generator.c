@@ -337,14 +337,12 @@ Hints_Generator * hints_generator_new()
     gen->root = NULL;
     gen->rules = vector_new(free_rule);
     gen->states = NULL;
-    gen->hint_states = set_new(compare_hint_states, free_state);
 
     return gen;
 }
 
 void hints_generator_done(Hints_Generator *gen)
 {
-    set_done(gen->hint_states);
     vector_clear(gen->rules);
     vector_done(gen->rules);
     free(gen);
@@ -363,6 +361,8 @@ void hints_generator_hints(Hints_Generator *gen, const wchar_t* word,
     match_rules_to_word(gen, word);
 
     gen->states = set_new(compare_state, free_state);
+    gen->hint_states = set_new(compare_hint_states, free_state);
+
     add_extended_states(gen, state_new(gen->root, NULL, word, 0, len, true));
 
     int k = 1;
@@ -375,6 +375,7 @@ void hints_generator_hints(Hints_Generator *gen, const wchar_t* word,
 
     get_hints(gen, list);
 
+    set_done(gen->hint_states);
     set_clear(gen->states);
     set_done(gen->states);
 
