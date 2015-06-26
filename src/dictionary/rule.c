@@ -240,8 +240,15 @@ static Vector * get_next_nodes(Rule *rule, Node *node)
         if (is_decimal(rule->right[i]))
         {
             int var = decimal_to_int(rule->right[i]);
-            if (rule->vars[var] == L'\0') free_var = var;
-            right[i] = rule->vars[i];
+            if (rule->vars[var] == L'\0')
+            {
+                free_var = var;
+                right[i] = rule->right[i];
+            }
+            else
+            {
+                right[i] = rule->vars[var];
+            }
         }
         else
         {
@@ -250,7 +257,7 @@ static Vector * get_next_nodes(Rule *rule, Node *node)
     }
 
     int j = 0;
-    while (j < rule->right_len && !is_decimal(rule->right[j]))
+    while (j < rule->right_len && !is_decimal(right[j]))
     {
         node = node_get_child(node, right[j]);
         if (node == NULL) return nodes;
@@ -272,8 +279,14 @@ static Vector * get_next_nodes(Rule *rule, Node *node)
         int k = j;
         while (k < rule->right_len && tmp != NULL)
         {
-            if (is_decimal(rule->right[k])) right[k] = rule->vars[free_var];
-            tmp = node_get_child(tmp, right[k]);
+            if (is_decimal(right[k]))
+            {
+                tmp = node_get_child(tmp, rule->vars[free_var]);
+            }
+            else
+            {
+                tmp = node_get_child(tmp, right[k]);
+            }
             k++;
         }
 
@@ -323,12 +336,6 @@ bool rule_matches_prefix(Rule *rule, bool is_start, const wchar_t *word)
     int len = wcslen(word);
 
     if (len < rule->left_len) return false;
-    if (rule->flag == RULE_END && len != rule->left_len) return false;
-    if (rule->flag == RULE_BEGIN && !is_start) return false;
-    if (rule->flag == RULE_SPLIT && (is_start || len == rule->left_len))
-    {
-        return false;
-    }
 
     return set_vars(rule, word);
 }
@@ -336,6 +343,16 @@ bool rule_matches_prefix(Rule *rule, bool is_start, const wchar_t *word)
 Vector * rule_apply(Rule *rule, State *state, Node *root)
 {
     Vector *states = vector_new(fake_free);
+
+    if (rule->flag == RULE_BEGIN && (!state->prev && state->node != root))
+    {
+        return states;
+    }
+
+    if (rule->flag == RULE_SPLIT && (!state->prev && state->node == root))
+    {
+        return states;
+    }
 
     if (rule->flag == RULE_SPLIT && state->prev != NULL) return states;
 

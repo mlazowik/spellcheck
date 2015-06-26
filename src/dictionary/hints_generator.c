@@ -213,7 +213,8 @@ static void add_states(Hints_Generator *gen, int cost)
     Vector *states = vector_new(free_state);
     for (size_t i = 0; i < set_size(gen->states); i++)
     {
-        vector_push_back(states, set_get_by_index(gen->states, i));
+        State *state = set_get_by_index(gen->states, i);
+        if (state->expandable) vector_push_back(states, state);
     }
 
     for (size_t i = 0; i < vector_size(states); i++)
@@ -273,15 +274,12 @@ static void get_hints(Hints_Generator *gen, struct word_list *list)
 
     for (size_t i = 0; i < set_size(gen->states); i++)
     {
-        if (set_size(all_hints) < DICTIONARY_MAX_HINTS)
+        State *state = set_get_by_index(gen->states, i);
+        if (node_is_word(state->node) && state->sufix_len == 0)
         {
-            State *state = set_get_by_index(gen->states, i);
-            if (node_is_word(state->node) && state->sufix_len == 0)
-            {
-                wchar_t *hint = state_to_string(state);
-                if (!set_insert(all_hints, hint)) free(hint);
-                else word_list_add(hints[state->cost], hint);
-            }
+            wchar_t *hint = state_to_string(state);
+            if (!set_insert(all_hints, hint)) free(hint);
+            else word_list_add(hints[state->cost], hint);
         }
     }
 
@@ -291,7 +289,10 @@ static void get_hints(Hints_Generator *gen, struct word_list *list)
         const wchar_t * const *a = word_list_get(hints[i]);
         for (size_t j = 0; j < word_list_size(hints[i]); j++)
         {
-            word_list_add(list, a[j]);
+            if (word_list_size(list) < DICTIONARY_MAX_HINTS)
+            {
+                word_list_add(list, a[j]);
+            }
         }
         word_list_done(hints[i]);
     }
