@@ -98,10 +98,10 @@ static int compare_hint_states(void *_a, void *_b)
     return 0;
 }
 
-static int compare_hint_strings(void *_a, void *_b)
+static int compare_hint_strings(const void *_a, const void *_b)
 {
-    State *a = (State*) _a;
-    State *b = (State*) _b;
+    State *a = *(State**) _a;
+    State *b = *(State**) _b;
 
     if (a->cost != b->cost) return a->cost < b->cost;
 
@@ -293,9 +293,9 @@ static void get_hints(Hints_Generator *gen, struct word_list *list)
         {
             word_list_add(list, state->string);
         }
+        free(state->string);
     }
 
-    vector_clear(all_hints);
     vector_done(all_hints);
 }
 

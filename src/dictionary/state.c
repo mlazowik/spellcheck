@@ -80,7 +80,6 @@ State * state_new(Node *node, Node *prev, const wchar_t *sufix, int cost,
 
 void state_done(State *state)
 {
-    free(state->string);
     free(state);
 }
 
