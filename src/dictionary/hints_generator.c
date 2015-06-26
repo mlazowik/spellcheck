@@ -103,7 +103,8 @@ static int compare_hint_strings(const void *_a, const void *_b)
     State *a = *(State**) _a;
     State *b = *(State**) _b;
 
-    if (a->cost != b->cost) return a->cost < b->cost;
+    if (a->cost < b->cost) return 1;
+    if (a->cost > b->cost) return -1;
 
     return wcscoll(a->string, b->string);
 }
