@@ -194,7 +194,6 @@ static void push_word_to_io_mock(wchar_t *word)
 
 /**
   Usuwa pozostałe znaki z atrapy wejścia.
-  @param io We/wy, aby parametry atrapy się zgadzały.
   */
 static void pop_remaining_chars()
 {

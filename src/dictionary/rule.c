@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-06-21
+    @date 2015-06-26
  */
 
 #include "rule.h"
@@ -21,13 +21,20 @@
   */
 struct rule
 {
-    wchar_t *left;          ///< Lewa strona reguły.
-    size_t left_len;        ///< Długość lewej strony.
-    wchar_t *right;         ///< Prawa strona reguły.
-    size_t right_len;       ///< Długość prawej strony.
-    int cost;               ///< Koszt reguły.
-    enum rule_flag flag;    ///< Użyta flaga bądź jej brak.
-    wchar_t vars[10];       ///< Wartości zmiennych.
+    /// Lewa strona reguły.
+    wchar_t *left;
+    /// Długość lewej strony.
+    size_t left_len;
+    /// Prawa strona reguły.
+    wchar_t *right;
+    /// Długość prawej strony.
+    size_t right_len;
+    /// Koszt reguły.
+    int cost;
+    /// Użyta flaga bądź jej brak.
+    enum rule_flag flag;
+    /// Wartości zmiennych.
+    wchar_t vars[10];
 };
 
 /** @name Funkcje pomocnicze
@@ -73,9 +80,6 @@ static bool is_decimal(wchar_t wc)
     return false;
 }
 
-/*
- Konwertuje znak na liczbę
- */
 static int decimal_to_int(wchar_t wc)
 {
     return wc - L'0';
@@ -125,19 +129,11 @@ static int vars_only_in_right(Rule *rule)
     return only_in_right;
 }
 
-/**
-  Destrukcja znaku.
-  @param el Wartość do usunięcia
-  */
 static void free_char(void *el)
 {
     free(el);
 }
 
-/**
-  Tworzenie znaku
-  @param a Wartość którą ma przyjąć.
-  */
 static wchar_t * char_new(wchar_t a)
 {
     int *ret = (wchar_t*) malloc(sizeof(wchar_t));
@@ -229,6 +225,9 @@ static bool set_vars(Rule *rule, const wchar_t *word)
     return true;
 }
 
+/*
+ Zwraca węzły do których dochodzi się po zastosowaniu reguły.
+ */
 static Vector * get_next_nodes(Rule *rule, Node *node)
 {
     wchar_t right[rule->right_len];

@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-06-21
+    @date 2015-06-26
  */
 
 #ifndef __VECTOR_H__
@@ -78,6 +78,11 @@ void vector_clear(Vector *vector);
   */
 void * vector_get_by_index(const Vector *vector, const int index);
 
+/**
+  Sortuje elementy wektora. *
+  @param vector Wektor.
+  @param cmp Funkcja porównująca elementy.
+  */
 void vector_sort(Vector *vector, vector_cmp_func cmp);
 
 /**

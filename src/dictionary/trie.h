@@ -35,6 +35,11 @@ Trie * trie_new();
   */
 void trie_done(Trie *trie);
 
+/**
+  Zwraca korzeń.
+  @param trie Drzewo.
+  @return Korzeń.
+  */
 Node *trie_get_root(Trie *trie);
 
 /**

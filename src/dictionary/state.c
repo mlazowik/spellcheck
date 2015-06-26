@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-06-22
+    @date 2015-06-26
  */
 
 #include "state.h"
@@ -108,13 +108,6 @@ wchar_t * state_to_string(State *state)
     }
 
     return string;
-}
-
-void print_state(State *state)
-{
-    wchar_t *word = state_to_string(state);
-    fprintf(stderr, "'%ls'\n", word);
-    free(word);
 }
 
 /**@}*/

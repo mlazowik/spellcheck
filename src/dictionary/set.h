@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-06-19
+    @date 2015-06-26
  */
 
 #ifndef __SET_H__
@@ -36,6 +36,10 @@ Set * set_new(set_cmp_func cmp, set_free_el_func free_el);
   */
 void set_done(Set *set);
 
+/**
+  Usuwa wszystkie elementy zbioru niszcząc je.
+  @param set Zbiór.
+  */
 void set_clear(Set *set);
 
 /**

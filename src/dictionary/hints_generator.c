@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-06-22
+    @date 2015-06-26
  */
 
 #include "hints_generator.h"
@@ -198,9 +198,6 @@ static void free_word_rules(Hints_Generator *gen, int word_len)
     free(gen->word_rules);
 }
 
-/*
- Dodaje stan lub podmienia, jeśli lepszy koszt.
- */
 static void add_state(Hints_Generator *gen, State *state)
 {
     vector_push_back(gen->states, state);

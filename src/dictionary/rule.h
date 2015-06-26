@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-06-21
+    @date 2015-06-26
  */
 
 #ifndef __RULE_H__
@@ -49,11 +49,21 @@ int rule_get_cost(Rule *rule);
 
 /**
   Stwierdza, czy reguła pasuje do prefiksu słowa.
+  @param rule Reguła.
+  @param is_start Czy prefiks jest na początku słowa.
   @param word Słowo.
   @return Czy reguła pasuje do prefiksu słowa.
   */
 bool rule_matches_prefix(Rule *rule, bool is_start, const wchar_t *word);
 
+/**
+  Stosuje regułę do stanu.
+
+  @param rule Reguła.
+  @param state Stan.
+  @param root Korzeń drzewa słownika.
+  @return Wektor stanów.
+  */
 Vector * rule_apply(Rule *rule, State *state, Node *root);
 
 /**

@@ -4,7 +4,7 @@
     @ingroup dictionary
     @author Michał Łazowik <m.lazowik@student.uw.edu.pl>
     @copyright Uniwersytet Warszawski
-    @date 2015-06-05
+    @date 2015-06-26
  */
 
 #ifndef __NODE_H__
@@ -93,6 +93,12 @@ void node_set_is_word(Node *node, const bool is_word);
   */
 const int node_children_count(const Node *node);
 
+/**
+  Zwraca dziecko o danym indeksie.
+  @param[in] node Węzeł.
+  @param[in] index Indeks.
+  @return Węzeł.
+  */
 Node * node_get_child_by_index(const Node *node, const int index);
 
 /**
