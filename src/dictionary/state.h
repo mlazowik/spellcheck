@@ -18,6 +18,7 @@ typedef struct state State;
 struct state
 {
     const wchar_t *sufix;
+    wchar_t *string;
     Node *node, *prev;
     int cost, sufix_len;
     bool expandable;

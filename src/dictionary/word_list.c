@@ -133,7 +133,7 @@ static int word_compare(const void *a, const void *b)
 }
 
 /**@}*/
-/** @name Elementy interfejsu 
+/** @name Elementy interfejsu
    @{
  */
 

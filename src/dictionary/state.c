@@ -70,6 +70,7 @@ State * state_new(Node *node, Node *prev, const wchar_t *sufix, int cost,
     state->node = node;
     state->prev = prev;
     state->sufix = sufix;
+    state->string = NULL;
     state->cost = cost;
     state->sufix_len = sufix_len;
     state->expandable = expandable;
@@ -79,6 +80,7 @@ State * state_new(Node *node, Node *prev, const wchar_t *sufix, int cost,
 
 void state_done(State *state)
 {
+    free(state->string);
     free(state);
 }
 

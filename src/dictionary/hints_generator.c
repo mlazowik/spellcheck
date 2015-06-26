@@ -98,12 +98,14 @@ static int compare_hint_states(void *_a, void *_b)
     return 0;
 }
 
-static int compare_strings(void *_a, void *_b)
+static int compare_hint_strings(void *_a, void *_b)
 {
-    wchar_t *a = (wchar_t*) _a;
-    wchar_t *b = (wchar_t*) _b;
+    State *a = (State*) _a;
+    State *b = (State*) _b;
 
-    return wcscoll(a, b);
+    if (a->cost != b->cost) return a->cost < b->cost;
+
+    return wcscoll(a->string, b->string);
 }
 
 /*
@@ -264,41 +266,37 @@ static int count_hints(Hints_Generator *gen)
 
 static void get_hints(Hints_Generator *gen, struct word_list *list)
 {
-    Set *all_hints = set_new(compare_strings, free);
-    struct word_list *hints[gen->max_cost+1];
-    for (size_t i = 0; i <= gen->max_cost; i++)
-    {
-        hints[i] = emalloc(sizeof(struct word_list));
-        word_list_init(hints[i]);
-    }
+    Vector *all_hints = vector_new(free_state);
 
     for (size_t i = 0; i < set_size(gen->states); i++)
     {
         State *state = set_get_by_index(gen->states, i);
         if (node_is_word(state->node) && state->sufix_len == 0)
         {
-            wchar_t *hint = state_to_string(state);
-            if (!set_insert(all_hints, hint)) free(hint);
-            else word_list_add(hints[state->cost], hint);
+            state->string = state_to_string(state);
+            vector_push_back(all_hints, state);
         }
     }
 
-    for (size_t i = 0; i <= gen->max_cost; i++)
+    vector_sort(all_hints, compare_hint_strings);
+
+    for (size_t i = 0; i < vector_size(all_hints); i++)
     {
-        word_list_sort(hints[i]);
-        const wchar_t * const *a = word_list_get(hints[i]);
-        for (size_t j = 0; j < word_list_size(hints[i]); j++)
+        State *state = vector_get_by_index(all_hints, i);
+        bool different = true;
+        if (word_list_size(list) > 0)
         {
-            if (word_list_size(list) < DICTIONARY_MAX_HINTS)
-            {
-                word_list_add(list, a[j]);
-            }
+            const wchar_t *prev = word_list_get(list)[word_list_size(list) - 1];
+            if (wcscoll(state->string, prev) == 0) different = false;
         }
-        word_list_done(hints[i]);
+        if (word_list_size(list) < DICTIONARY_MAX_HINTS && different)
+        {
+            word_list_add(list, state->string);
+        }
     }
 
-    set_clear(all_hints);
-    set_done(all_hints);
+    vector_clear(all_hints);
+    vector_done(all_hints);
 }
 
 /*

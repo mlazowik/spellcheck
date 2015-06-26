@@ -15,6 +15,9 @@
 /// Typ funkcji niszczącej element wektora
 typedef void (*vector_free_el_func)(void *);
 
+/// Typ funkcji porównującej elemnty wektora
+typedef int (*vector_cmp_func)(void *, void *);
+
 /**
   Struktura przechowująca tablicę.
   */
@@ -74,6 +77,8 @@ void vector_clear(Vector *vector);
   @return Element tablicy lub NULL, jeśli nie istnieje.
   */
 void * vector_get_by_index(const Vector *vector, const int index);
+
+void vector_sort(Vector *vector, vector_cmp_func cmp);
 
 /**
   Zwraca liczę elementów w wektorze.
