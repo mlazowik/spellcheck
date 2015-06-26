@@ -16,7 +16,7 @@
 typedef void (*vector_free_el_func)(void *);
 
 /// Typ funkcji porównującej elemnty wektora
-typedef int (*vector_cmp_func)(void *, void *);
+typedef int (*vector_cmp_func)(const void *, const void *);
 
 /**
   Struktura przechowująca tablicę.

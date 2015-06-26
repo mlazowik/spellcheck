@@ -36,7 +36,7 @@ struct hints_generator
     /// Reguły wg. kosztu i sufiksu do którego pasują.
     Vector ***word_rules;
     /// Stany.
-    Set *states;
+    Vector *states;
     /// Stany będące unikalnymi podpowiedziami
     Set *hint_states;
 };
@@ -60,7 +60,7 @@ static void * emalloc(size_t el_size)
     return ret;
 }
 
-static int compare_state(void *_a, void *_b)
+static int compare_state(const void *_a, const void *_b)
 {
     State *a = (State*) _a;
     State *b = (State*) _b;
@@ -175,28 +175,14 @@ static void free_word_rules(Hints_Generator *gen, int word_len)
 /*
  Dodaje stan lub podmienia, jeśli lepszy koszt.
  */
-static bool add_or_replace_state(Hints_Generator *gen, State *state)
+static void add_state(Hints_Generator *gen, State *state)
 {
-    State *existing = set_find(gen->states, state);
-    if (existing != NULL)
-    {
-        if (existing->cost <= state->cost)
-        {
-            free(state);
-            return false;
-        }
-
-        set_delete(gen->states, state);
-    }
-
-    set_insert(gen->states, state);
+    vector_push_back(gen->states, state);
 
     if (node_is_word(state->node) && state->sufix[0] == L'\0')
     {
         set_insert(gen->hint_states, state);
     }
-
-    return true;
 }
 
 /*
@@ -204,7 +190,7 @@ static bool add_or_replace_state(Hints_Generator *gen, State *state)
  */
 static void add_extended_states(Hints_Generator *gen, State *state)
 {
-    if (!add_or_replace_state(gen, state)) return;
+    add_state(gen, state);
 
     if (!state->expandable) return;
 
@@ -214,22 +200,17 @@ static void add_extended_states(Hints_Generator *gen, State *state)
         Node *child = node_get_child(state->node, state->sufix[0]);
         state = state_new(child, state->prev, state->sufix+1, state->cost,
                           state->sufix_len-1, state->expandable);
-        if (!add_or_replace_state(gen, state)) return;
+        add_state(gen, state);
     }
 }
 
 static void add_states(Hints_Generator *gen, int cost)
 {
-    Vector *states = vector_new(free_state);
-    for (size_t i = 0; i < set_size(gen->states); i++)
-    {
-        State *state = set_get_by_index(gen->states, i);
-        if (state->expandable) vector_push_back(states, state);
-    }
+    size_t n_states = vector_size(gen->states);
 
-    for (size_t i = 0; i < vector_size(states); i++)
+    for (size_t i = 0; i < n_states; i++)
     {
-        State *state = vector_get_by_index(states, i);
+        State *state = vector_get_by_index(gen->states, i);
         if (cost - state->cost <= gen->max_rule_cost)
         {
             Vector *rules = gen->word_rules[cost - state->cost][state->sufix_len];
@@ -246,8 +227,32 @@ static void add_states(Hints_Generator *gen, int cost)
             }
         }
     }
+}
 
-    vector_done(states);
+static void remove_duplicates(Hints_Generator *gen)
+{
+    Vector *deduplicated = vector_new(free_state);
+
+    vector_sort(gen->states, compare_state);
+
+    State *cur, *prev = NULL;
+    for (size_t i = 0; i < vector_size(gen->states); i++)
+    {
+        cur = vector_get_by_index(gen->states, i);
+        if (prev && compare_state(cur, prev) == 0)
+        {
+            state_done(cur);
+        }
+        else
+        {
+            vector_push_back(deduplicated, cur);
+            prev = cur;
+        }
+    }
+
+    vector_done(gen->states);
+
+    gen->states = deduplicated;
 }
 
 /*
@@ -262,9 +267,9 @@ static void get_hints(Hints_Generator *gen, struct word_list *list)
 {
     Vector *all_hints = vector_new(free_state);
 
-    for (size_t i = 0; i < set_size(gen->states); i++)
+    for (size_t i = 0; i < vector_size(gen->states); i++)
     {
-        State *state = set_get_by_index(gen->states, i);
+        State *state = vector_get_by_index(gen->states, i);
         if (node_is_word(state->node) && state->sufix_len == 0)
         {
             state->string = state_to_string(state);
@@ -360,7 +365,7 @@ void hints_generator_hints(Hints_Generator *gen, const wchar_t* word,
     init_word_rules(gen, len);
     match_rules_to_word(gen, word);
 
-    gen->states = set_new(compare_state, free_state);
+    gen->states = vector_new(free_state);
     gen->hint_states = set_new(compare_hint_states, free_state);
 
     add_extended_states(gen, state_new(gen->root, NULL, word, 0, len, true));
@@ -370,14 +375,15 @@ void hints_generator_hints(Hints_Generator *gen, const wchar_t* word,
            && k <= gen->max_cost)
     {
         add_states(gen, k);
+        remove_duplicates(gen);
         k++;
     }
 
     get_hints(gen, list);
 
     set_done(gen->hint_states);
-    set_clear(gen->states);
-    set_done(gen->states);
+    vector_clear(gen->states);
+    vector_done(gen->states);
 
     free_word_rules(gen, len);
 }
