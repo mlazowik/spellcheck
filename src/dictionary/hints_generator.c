@@ -65,20 +65,33 @@ static int compare_state(const void *_a, const void *_b)
     State *a = (State*) _a;
     State *b = (State*) _b;
 
-    if ((uintptr_t)a->node < (uintptr_t)b->node) return 1;
-    if ((uintptr_t)a->node > (uintptr_t)b->node) return -1;
+    if ((uintptr_t)a->node < (uintptr_t)b->node) return -1;
+    if ((uintptr_t)a->node > (uintptr_t)b->node) return 1;
 
-    if ((uintptr_t)a->sufix < (uintptr_t)b->sufix) return 1;
-    if ((uintptr_t)a->sufix > (uintptr_t)b->sufix) return -1;
+    if ((uintptr_t)a->sufix < (uintptr_t)b->sufix) return -1;
+    if ((uintptr_t)a->sufix > (uintptr_t)b->sufix) return 1;
 
-    if (!a->prev && b->prev) return 1;
-    if (a->prev && !b->prev) return -1;
+    if (!a->prev && b->prev) return -1;
+    if (a->prev && !b->prev) return 1;
 
-    if ((uintptr_t)a->prev < (uintptr_t)b->prev) return 1;
-    if ((uintptr_t)a->prev > (uintptr_t)b->prev) return -1;
+    if ((uintptr_t)a->prev < (uintptr_t)b->prev) return -1;
+    if ((uintptr_t)a->prev > (uintptr_t)b->prev) return 1;
 
-    if (a->expandable && !b->expandable) return 1;
-    if (!a->expandable && b->expandable) return -1;
+    if (a->expandable && !b->expandable) return -1;
+    if (!a->expandable && b->expandable) return 1;
+
+    return 0;
+}
+
+static int compare_state_cost(const void *_a, const void *_b)
+{
+    State *a = (State*) _a;
+    State *b = (State*) _b;
+
+    if (compare_state(_a, _b) != 0) return compare_state(_a, _b);
+
+    if (a->cost < b->cost) return -1;
+    if (a->cost > b->cost ) return 1;
 
     return 0;
 }
@@ -88,14 +101,14 @@ static int compare_hint_states(void *_a, void *_b)
     State *a = (State*) _a;
     State *b = (State*) _b;
 
-    if ((uintptr_t)a->node < (uintptr_t)b->node) return 1;
-    if ((uintptr_t)a->node > (uintptr_t)b->node) return -1;
+    if ((uintptr_t)a->node < (uintptr_t)b->node) return -1;
+    if ((uintptr_t)a->node > (uintptr_t)b->node) return 1;
 
-    if (!a->prev && b->prev) return 1;
-    if (a->prev && !b->prev) return -1;
+    if (!a->prev && b->prev) return -1;
+    if (a->prev && !b->prev) return 1;
 
-    if ((uintptr_t)a->prev < (uintptr_t)b->prev) return 1;
-    if ((uintptr_t)a->prev > (uintptr_t)b->prev) return -1;
+    if ((uintptr_t)a->prev < (uintptr_t)b->prev) return -1;
+    if ((uintptr_t)a->prev > (uintptr_t)b->prev) return 1;
 
     return 0;
 }
@@ -179,7 +192,7 @@ static void add_state(Hints_Generator *gen, State *state)
 {
     vector_push_back(gen->states, state);
 
-    if (node_is_word(state->node) && state->sufix[0] == L'\0')
+    if (node_is_word(state->node) && state->sufix_len == 0)
     {
         set_insert(gen->hint_states, state);
     }
@@ -211,7 +224,7 @@ static void add_states(Hints_Generator *gen, int cost)
     for (size_t i = 0; i < n_states; i++)
     {
         State *state = vector_get_by_index(gen->states, i);
-        if (cost - state->cost <= gen->max_rule_cost)
+        if (state->expandable && cost - state->cost <= gen->max_rule_cost)
         {
             Vector *rules = gen->word_rules[cost - state->cost][state->sufix_len];
             for (size_t j = 0; j < vector_size(rules); j++)
@@ -233,15 +246,16 @@ static void remove_duplicates(Hints_Generator *gen)
 {
     Vector *deduplicated = vector_new(free_state);
 
-    vector_sort(gen->states, compare_state);
+    vector_sort(gen->states, compare_state_cost);
 
     State *cur, *prev = NULL;
     for (size_t i = 0; i < vector_size(gen->states); i++)
     {
         cur = vector_get_by_index(gen->states, i);
-        if (prev && compare_state(cur, prev) == 0)
+        if (prev != NULL && compare_state(cur, prev) == 0)
         {
             state_done(cur);
+
         }
         else
         {
@@ -369,6 +383,7 @@ void hints_generator_hints(Hints_Generator *gen, const wchar_t* word,
     gen->hint_states = set_new(compare_hint_states, free_state);
 
     add_extended_states(gen, state_new(gen->root, NULL, word, 0, len, true));
+    remove_duplicates(gen);
 
     int k = 1;
     while (count_hints(gen) < DICTIONARY_MAX_HINTS
