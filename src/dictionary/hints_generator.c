@@ -37,6 +37,8 @@ struct hints_generator
     Vector ***word_rules;
     /// Stany.
     Set *states;
+    /// Stany będące unikalnymi podpowiedziami
+    Set *hint_states;
 };
 
 /** @name Funkcje pomocnicze
@@ -189,6 +191,11 @@ static bool add_or_replace_state(Hints_Generator *gen, State *state)
 
     set_insert(gen->states, state);
 
+    if (node_is_word(state->node) && state->sufix[0] == L'\0')
+    {
+        set_insert(gen->hint_states, state);
+    }
+
     return true;
 }
 
@@ -248,21 +255,7 @@ static void add_states(Hints_Generator *gen, int cost)
  */
 static int count_hints(Hints_Generator *gen)
 {
-    Set *hint_states = set_new(compare_hint_states, free_state);
-
-    for (size_t i = 0; i < set_size(gen->states); i++)
-    {
-        State *state = set_get_by_index(gen->states, i);
-        if (node_is_word(state->node) && state->sufix[0] == L'\0')
-        {
-            set_insert(hint_states, state);
-        }
-    }
-
-    int ret = set_size(hint_states);
-    set_done(hint_states);
-
-    return ret;
+    return set_size(gen->hint_states);
 }
 
 static void get_hints(Hints_Generator *gen, struct word_list *list)
@@ -284,16 +277,21 @@ static void get_hints(Hints_Generator *gen, struct word_list *list)
     for (size_t i = 0; i < vector_size(all_hints); i++)
     {
         State *state = vector_get_by_index(all_hints, i);
-        bool different = true;
-        if (word_list_size(list) > 0)
+
+        if (word_list_size(list) < DICTIONARY_MAX_HINTS)
         {
-            const wchar_t *prev = word_list_get(list)[word_list_size(list) - 1];
-            if (wcscoll(state->string, prev) == 0) different = false;
+            bool different = true;
+            if (word_list_size(list) > 0)
+            {
+                const wchar_t *prev = word_list_get(list)[word_list_size(list) - 1];
+                if (wcscoll(state->string, prev) == 0) different = false;
+            }
+            if (different)
+            {
+                word_list_add(list, state->string);
+            }
         }
-        if (word_list_size(list) < DICTIONARY_MAX_HINTS && different)
-        {
-            word_list_add(list, state->string);
-        }
+
         free(state->string);
     }
 
@@ -339,12 +337,14 @@ Hints_Generator * hints_generator_new()
     gen->root = NULL;
     gen->rules = vector_new(free_rule);
     gen->states = NULL;
+    gen->hint_states = set_new(compare_hint_states, free_state);
 
     return gen;
 }
 
 void hints_generator_done(Hints_Generator *gen)
 {
+    set_done(gen->hint_states);
     vector_clear(gen->rules);
     vector_done(gen->rules);
     free(gen);
