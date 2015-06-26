@@ -85,10 +85,23 @@ static int compare_state(const void *_a, const void *_b)
 
 static int compare_state_cost(const void *_a, const void *_b)
 {
-    State *a = (State*) _a;
-    State *b = (State*) _b;
+    State *a = *(State**) _a;
+    State *b = *(State**) _b;
 
-    if (compare_state(_a, _b) != 0) return compare_state(_a, _b);
+    if ((uintptr_t)a->node < (uintptr_t)b->node) return -1;
+    if ((uintptr_t)a->node > (uintptr_t)b->node) return 1;
+
+    if ((uintptr_t)a->sufix < (uintptr_t)b->sufix) return -1;
+    if ((uintptr_t)a->sufix > (uintptr_t)b->sufix) return 1;
+
+    if (!a->prev && b->prev) return -1;
+    if (a->prev && !b->prev) return 1;
+
+    if ((uintptr_t)a->prev < (uintptr_t)b->prev) return -1;
+    if ((uintptr_t)a->prev > (uintptr_t)b->prev) return 1;
+
+    if (a->expandable && !b->expandable) return -1;
+    if (!a->expandable && b->expandable) return 1;
 
     if (a->cost < b->cost) return -1;
     if (a->cost > b->cost ) return 1;
@@ -98,8 +111,8 @@ static int compare_state_cost(const void *_a, const void *_b)
 
 static int compare_hint_states(void *_a, void *_b)
 {
-    State *a = (State*) _a;
-    State *b = (State*) _b;
+    State *a = *(State**) _a;
+    State *b = *(State**) _b;
 
     if ((uintptr_t)a->node < (uintptr_t)b->node) return -1;
     if ((uintptr_t)a->node > (uintptr_t)b->node) return 1;
