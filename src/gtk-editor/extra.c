@@ -270,8 +270,9 @@ static bool select_lang () {
   if (response == GTK_RESPONSE_ACCEPT) {
     new_lang = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo));
 
-    struct dictionary *new_dict;
-    if ((new_dict = dictionary_load_lang(new_lang)) == NULL) {
+    struct dictionary *new_dict = dictionary_load_lang(new_lang);
+
+    if (!new_dict) {
       error_dialog("Nie udało się wczytać słownika dla wybranego języka.");
       g_free(new_lang);
     } else {
