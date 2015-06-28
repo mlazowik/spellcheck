@@ -90,6 +90,6 @@ void vector_sort(Vector *vector, vector_cmp_func cmp);
   @param[in] vector Wektor.
   @return Liczba elementów tablicy.
   */
-size_t vector_size(const Vector *vector);
+const size_t vector_size(const Vector *vector);
 
 #endif /* __VECTOR_H__ */

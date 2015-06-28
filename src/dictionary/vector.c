@@ -196,7 +196,7 @@ void vector_sort(Vector *vector, vector_cmp_func cmp)
     qsort(vector->data, vector->size, sizeof(void*), cmp);
 }
 
-size_t vector_size(const Vector *vector)
+const size_t vector_size(const Vector *vector)
 {
     return vector->size;
 }

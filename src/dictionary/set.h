@@ -79,6 +79,6 @@ void * set_get_by_index(const Set *set, const int index);
   @param[in] set Zbiór.
   @return Liczba elementów zbioru.
   */
-size_t set_size(const Set *set);
+const size_t set_size(const Set *set);
 
 #endif /* __SET_H__ */

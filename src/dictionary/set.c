@@ -127,7 +127,7 @@ void * set_get_by_index(const Set *set, const int index)
     return vector_get_by_index(set->data, index);
 }
 
-size_t set_size(const Set *set)
+const size_t set_size(const Set *set)
 {
     return vector_size(set->data);
 }

@@ -385,9 +385,13 @@ Vector * rule_apply(Rule *rule, State *state, Node *root)
                 state_done(new_state);
             }
         }
-        else
+        else if (rule->flag != RULE_END || node_is_word(node))
         {
             vector_push_back(states, new_state);
+        }
+        else
+        {
+            state_done(new_state);
         }
     }
 
