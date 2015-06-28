@@ -25,6 +25,8 @@ static struct dictionary *dict = NULL;
 static char *lang = NULL;
 /// Czy sprawdzać pisownię w locie
 static bool spellcheck_on = false;
+/// ID połączenia edycji tekstu z sprawdzaniem pisowni
+static gulong spellcheck_handler;
 
 static bool select_lang ();
 
@@ -504,15 +506,14 @@ static void toggle_spellcheck(GtkCheckMenuItem *spellcheck_item) {
 
     check_buffer();
 
-    g_signal_connect(G_OBJECT(editor_buf), "changed",
-                     G_CALLBACK(check_at_cursor), NULL);
+    spellcheck_handler = g_signal_connect(G_OBJECT(editor_buf), "changed",
+                                          G_CALLBACK(check_at_cursor), NULL);
   } else {
     spellcheck_on = false;
 
     clear_all_highlighted();
 
-    g_signal_handlers_disconnect_by_func(G_OBJECT(editor_buf),
-                                         check_buffer, NULL);
+    g_signal_handler_disconnect(G_OBJECT(editor_buf), spellcheck_handler);
   }
 }
 
