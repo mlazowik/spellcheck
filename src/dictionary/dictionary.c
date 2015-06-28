@@ -160,6 +160,7 @@ int dictionary_lang_list(char **list, size_t *list_len)
     *list = NULL;
     *list_len = 0;
 
+    mkdir(CONF_PATH, 0755);
     DIR *dir = opendir(CONF_PATH);
 
     if (dir == NULL) return -1;
