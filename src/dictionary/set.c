@@ -119,11 +119,7 @@ void * set_find(const Set *set, void *el)
 
 void * set_get_by_index(const Set *set, const int index)
 {
-    if (index < 0 || index >= set_size(set))
-    {
-        return NULL;
-    }
-
+    assert(index >= 0 && index < set_size(set));
     return vector_get_by_index(set->data, index);
 }
 
