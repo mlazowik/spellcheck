@@ -403,6 +403,11 @@ bool rule_is_legal(Rule *rule)
         return false;
     }
 
+    if (rule->cost <= 0)
+    {
+        return false;
+    }
+
     if (rule->left_len == 0 && rule->right_len == 0 && rule->flag != RULE_SPLIT)
     {
         return false;
