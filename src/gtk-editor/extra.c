@@ -19,6 +19,8 @@ enum CustomResponseType {
 static struct dictionary *dict = NULL;
 static char *lang = NULL;
 
+static bool select_lang ();
+
 static void delete_dictionary () {
   if (dict != NULL) dictionary_done(dict);
   g_free(lang);
@@ -86,6 +88,105 @@ static void error_dialog (const gchar *message) {
   gtk_widget_destroy(fail);
 }
 
+static bool is_on_word (GtkTextIter *end) {
+  return (gtk_text_iter_inside_word(end) || gtk_text_iter_ends_word(end));
+}
+
+static GtkTextIter get_word_start_iter (GtkTextIter *end) {
+  if (!gtk_text_iter_ends_word(end)) gtk_text_iter_forward_word_end(end);
+  GtkTextIter start = *end;
+  gtk_text_iter_backward_word_start(&start);
+  return start;
+}
+
+static gunichar * get_word (GtkTextIter *end) {
+  GtkTextIter start = get_word_start_iter(end);
+  char *word;
+  gunichar *wword;
+
+  word = gtk_text_iter_get_text(&start, end);
+
+  wword = g_utf8_to_ucs4_fast(word, -1, NULL);
+  g_free(word);
+
+  make_lowercase((wchar_t *)wword);
+
+  return wword;
+}
+
+static void highlight (GtkTextIter *end) {
+  GtkTextIter start = get_word_start_iter(end);;
+  gtk_text_buffer_apply_tag_by_name(editor_buf, "misspelled", &start, end);
+}
+
+static void clear_highlight (GtkTextIter *end) {
+  GtkTextIter start = get_word_start_iter(end);;
+  gtk_text_buffer_remove_tag_by_name(editor_buf, "misspelled", &start, end);
+}
+
+static void clear_all_highlighted () {
+  GtkTextIter end;
+
+  gtk_text_buffer_get_start_iter(editor_buf, &end);
+
+  bool not_end = true;
+  do {
+    not_end = gtk_text_iter_forward_word_end(&end);
+    if (is_on_word(&end)) clear_highlight(&end);
+  } while (not_end);
+}
+
+static void check_on_iter (GtkTextIter *end) {
+  gunichar *wword;
+
+  if (dict == NULL) {
+    if (!select_lang()) {
+      error_dialog("Sprawdzanie pisowni nie jest możliwe – nie udało się wybrać języka");
+      return;
+    };
+  }
+
+  if (is_on_word(end)) {
+    wword = get_word(end);
+
+    clear_highlight(end);
+
+    if (!dictionary_find(dict, (wchar_t *)wword)) {
+      highlight(end);
+    }
+
+    g_free(wword);
+  }
+}
+
+static void check_buffer () {
+  GtkTextIter end;
+
+  if (dict == NULL) {
+    if (!select_lang()) {
+      error_dialog("Sprawdzanie pisowni nie jest możliwe – nie udało się wybrać języka");
+      return;
+    };
+  }
+
+  gtk_text_buffer_get_start_iter(editor_buf, &end);
+
+  bool not_end = true;
+  do {
+    not_end = gtk_text_iter_forward_word_end(&end);
+    check_on_iter(&end);
+  } while (not_end);
+}
+
+static void check_at_cursor () {
+  GtkTextIter end;
+
+  gtk_text_buffer_get_iter_at_mark(editor_buf, &end,
+                                   gtk_text_buffer_get_insert(editor_buf));
+
+  check_on_iter(&end);
+}
+
 static bool add_lang () {
   bool ret = false;
 
@@ -111,7 +212,8 @@ static bool add_lang () {
     struct dictionary *new_dict = dictionary_new();
     if (dictionary_save_lang(new_dict, new_lang) < 0) {
       error_dialog("Nie udało się stworzyć słownika dla nowego języka");
-      delete_dictionary();
+      dictionary_done(new_dict);
+      g_free(new_lang);
     } else {
       swap_dictionary(new_dict, new_lang);
       ret = true;
@@ -180,6 +282,11 @@ static bool select_lang () {
     ret = add_lang();
   }
 
+  if (ret) {
+    clear_all_highlighted();
+    check_buffer();
+  }
+
   gtk_widget_destroy(dialog);
 
   return ret;
@@ -193,65 +300,16 @@ static bool add_word (wchar_t *word) {
     return false;
   }
 
+  clear_all_highlighted();
+  check_buffer();
+
   return true;
-}
-
-static void check_buffer () {
-  GtkTextIter start, end;
-  char *word;
-  gunichar *wword;
-
-  if (dict == NULL) {
-    if (!select_lang()) {
-      error_dialog("Sprawdzanie pisowni nie jest możliwe – nie udało się wybrać języka");
-      return;
-    };
-  }
-
-  gtk_text_buffer_get_start_iter(editor_buf, &end);
-
-  bool not_end = true;
-  do {
-    not_end = gtk_text_iter_forward_word_end(&end);
-
-    if (gtk_text_iter_inside_word(&end) || gtk_text_iter_ends_word(&end)) {
-      start = end;
-      gtk_text_iter_backward_word_start(&start);
-      word = gtk_text_iter_get_text(&start, &end);
-
-      wword = g_utf8_to_ucs4_fast(word, -1, NULL);
-      make_lowercase((wchar_t *)wword);
-
-      gtk_text_buffer_remove_tag_by_name(editor_buf, "misspelled", &start, &end);
-
-      if (!dictionary_find(dict, (wchar_t *)wword)) {
-        gtk_text_buffer_apply_tag_by_name(editor_buf, "misspelled", &start, &end);
-      }
-
-      g_free(word);
-      g_free(wword);
-    }
-  } while (not_end);
-}
-
-static void clear_highlighted() {
-  GtkTextIter start, end;
-
-  gtk_text_buffer_get_start_iter(editor_buf, &end);
-
-  while (gtk_text_iter_forward_word_end(&end)) {
-    start = end;
-    gtk_text_iter_backward_word_start(&start);
-
-    gtk_text_buffer_remove_tag_by_name(editor_buf, "misspelled", &start, &end);;
-  }
 }
 
 // Procedurka obsługi
 static void check_word (GtkMenuItem *item, gpointer data) {
   GtkWidget *dialog;
   GtkTextIter start, end;
-  char *word;
   gunichar *wword;
 
   // Znajdujemy pozycję kursora
@@ -259,7 +317,7 @@ static void check_word (GtkMenuItem *item, gpointer data) {
                                    gtk_text_buffer_get_insert(editor_buf));
 
   // Jeśli nie wewnątrz słowa, kończymy
-  if (!gtk_text_iter_inside_word(&end) && !gtk_text_iter_ends_word(&end)) {
+  if (!is_on_word(&end)) {
     error_dialog("Kursor musi być na słowie");
     return;
   }
@@ -271,15 +329,8 @@ static void check_word (GtkMenuItem *item, gpointer data) {
     };
   }
 
-  // Znajdujemy początek i koniec słowa, a potem samo słowo
-  if (!gtk_text_iter_ends_word(&end)) gtk_text_iter_forward_word_end(&end);
-  start = end;
-  gtk_text_iter_backward_word_start(&start);
-  word = gtk_text_iter_get_text(&start, &end);
-
-  // Zamieniamy na wide char (no prawie)
-  wword = g_utf8_to_ucs4_fast(word, -1, NULL);
-  make_lowercase((wchar_t *)wword);
+  wword = get_word(&end);
+  start = get_word_start_iter(&end);
 
   // Sprawdzamy
   if (dictionary_find(dict, (wchar_t *)wword)) {
@@ -360,7 +411,6 @@ static void check_word (GtkMenuItem *item, gpointer data) {
     }
     gtk_widget_destroy(dialog);
   }
-  g_free(word);
   g_free(wword);
 }
 
@@ -369,9 +419,9 @@ static void toggle_spellcheck(GtkCheckMenuItem *spellcheck_item) {
     check_buffer();
 
     g_signal_connect(G_OBJECT(editor_buf), "changed",
-                     G_CALLBACK(check_buffer), NULL);
+                     G_CALLBACK(check_at_cursor), NULL);
   } else {
-    clear_highlighted();
+    clear_all_highlighted();
     g_signal_handlers_disconnect_by_func(G_OBJECT(editor_buf),
                                          G_CALLBACK(check_buffer), NULL);
   }
@@ -384,8 +434,8 @@ static void setup() {
 
 // Tutaj dodacie nowe pozycje menu
 void extend_menu (GtkWidget *menubar) {
-  GtkWidget *spell_menu_item, *spell_menu, *check_item, *check_all_item,
-            *spellcheck_item, *lang_item;
+  GtkWidget *spell_menu_item, *spell_menu, *check_item, *spellcheck_item,
+            *lang_item;
 
   spell_menu_item = gtk_menu_item_new_with_label("Spell");
   spell_menu = gtk_menu_new();
@@ -399,13 +449,7 @@ void extend_menu (GtkWidget *menubar) {
   gtk_menu_shell_append(GTK_MENU_SHELL(spell_menu), check_item);
   gtk_widget_show(check_item);
 
-  check_all_item = gtk_menu_item_new_with_label("Check spelling");
-  g_signal_connect(G_OBJECT(check_all_item), "activate",
-                   G_CALLBACK(check_buffer), NULL);
-  gtk_menu_shell_append(GTK_MENU_SHELL(spell_menu), check_all_item);
-  gtk_widget_show(check_all_item);
-
-  spellcheck_item = gtk_check_menu_item_new_with_label("Spell checking");
+  spellcheck_item = gtk_check_menu_item_new_with_label("Check while typing");
   g_signal_connect(G_OBJECT(spellcheck_item), "toggled",
                    G_CALLBACK(toggle_spellcheck), NULL);
   gtk_menu_shell_append(GTK_MENU_SHELL(spell_menu), spellcheck_item);
