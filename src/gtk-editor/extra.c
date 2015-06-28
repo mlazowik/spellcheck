@@ -12,28 +12,44 @@
 #include "word_list.h"
 #include "dictionary.h"
 
+/**
+  Własne wartości zwracane z dialogów
+  */
 enum CustomResponseType {
-  CUSTOM_RESPONSE_ADD
+  CUSTOM_RESPONSE_ADD = 1000 // Żeby się nie pokrywało z bibliotecznymi
 };
 
+/// Aktualny słownik
 static struct dictionary *dict = NULL;
+/// Język aktualnego słownika
 static char *lang = NULL;
+/// Czy sprawdzać pisownię w locie
+static bool spellcheck_on = false;
 
 static bool select_lang ();
 
+/**
+  Usuwa słownik i informację o jego języku.
+  */
 static void delete_dictionary () {
   if (dict != NULL) dictionary_done(dict);
   g_free(lang);
 }
 
+/**
+  Podmienia słownik. *
+  @param dictionary Nowy słownik.
+  @param new_lang Nowy język.
+  */
 static void swap_dictionary (struct dictionary *new_dict, char *new_lang) {
   delete_dictionary();
   dict = new_dict;
   lang = new_lang;
 }
 
-/** Zamienia słowo na złożone z małych liter.
-  @param[in,out] word Modyfikowane słowo.
+/**
+  Zamienia słowo na złożone z małych liter.
+  @param word Modyfikowane słowo.
   @return 0, jeśli słowo nie jest złożone z samych liter, 1 w p.p.
  */
 int make_lowercase (wchar_t *word) {
@@ -80,6 +96,10 @@ void show_help (void) {
   gtk_widget_show_all(help_window);
 }
 
+/**
+  Wyświetla alert o błędzie.
+  @param message Wiadomość do wyświetlenia.
+  */
 static void error_dialog (const gchar *message) {
   GtkWidget *fail = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_ERROR,
                                            GTK_BUTTONS_OK,
@@ -88,10 +108,20 @@ static void error_dialog (const gchar *message) {
   gtk_widget_destroy(fail);
 }
 
+/**
+  Sprawdza, czy iterator znajduje się na słowie.
+  @param end Iterator.
+  @return Czy jest na słowie.
+  */
 static bool is_on_word (GtkTextIter *end) {
   return (gtk_text_iter_inside_word(end) || gtk_text_iter_ends_word(end));
 }
 
+/**
+  @brief Zwraca iterator wskazujący na początek słowa.
+  @param end Iterator na słowie.
+  @return Iterator na początku słowa
+  */
 static GtkTextIter get_word_start_iter (GtkTextIter *end) {
   if (!gtk_text_iter_ends_word(end)) gtk_text_iter_forward_word_end(end);
   GtkTextIter start = *end;
@@ -99,6 +129,11 @@ static GtkTextIter get_word_start_iter (GtkTextIter *end) {
   return start;
 }
 
+/**
+  Zwraca słowo wskazywane przez iterator.
+  @param end Iterator.
+  @return Słowo.
+  */
 static gunichar * get_word (GtkTextIter *end) {
   GtkTextIter start = get_word_start_iter(end);
   char *word;
@@ -114,16 +149,27 @@ static gunichar * get_word (GtkTextIter *end) {
   return wword;
 }
 
+/**
+  Podświetla słowo wskazywane przez iterator.
+  @param end Iterator.
+  */
 static void highlight (GtkTextIter *end) {
   GtkTextIter start = get_word_start_iter(end);;
   gtk_text_buffer_apply_tag_by_name(editor_buf, "misspelled", &start, end);
 }
 
+/**
+  Czyści podświetlenie słowa wskazywanego przez iterator.
+  @param end Iterator.
+  */
 static void clear_highlight (GtkTextIter *end) {
   GtkTextIter start = get_word_start_iter(end);;
   gtk_text_buffer_remove_tag_by_name(editor_buf, "misspelled", &start, end);
 }
 
+/**
+  Czyści podświetlenie wszystkich słów.
+  */
 static void clear_all_highlighted () {
   GtkTextIter end;
 
@@ -136,6 +182,10 @@ static void clear_all_highlighted () {
   } while (not_end);
 }
 
+/**
+  Sprawdza pisownię słowa wskazywanego przez iterator. *
+  @param end Iterator.
+  */
 static void check_on_iter (GtkTextIter *end) {
   gunichar *wword;
 
@@ -159,6 +209,9 @@ static void check_on_iter (GtkTextIter *end) {
   }
 }
 
+/**
+  Sprawdza pisownię w całym tekście.
+  */
 static void check_buffer () {
   GtkTextIter end;
 
@@ -178,6 +231,9 @@ static void check_buffer () {
   } while (not_end);
 }
 
+/**
+  Sprawdza pisownię słowa na którym jest kursor.
+  */
 static void check_at_cursor () {
   GtkTextIter end;
 
@@ -187,6 +243,10 @@ static void check_at_cursor () {
   check_on_iter(&end);
 }
 
+/**
+  Dodawanie języka.
+  @return Czy udało się stworzyć dla niego słownik.
+  */
 static bool add_lang () {
   bool ret = false;
 
@@ -225,6 +285,10 @@ static bool add_lang () {
   return ret;
 }
 
+/**
+  Wybór języka.
+  @return Czy udało się wczytać jego słownik.
+  */
 static bool select_lang () {
   bool ret = false;
 
@@ -243,7 +307,6 @@ static bool select_lang () {
   gtk_widget_show(label);
   gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 1);
 
-  // Spuszczane menu
   char *lang_list;
   size_t list_len;
 
@@ -293,6 +356,12 @@ static bool select_lang () {
   return ret;
 }
 
+/**
+  Dodaje słowo do słownika.
+  Jeśli sprawdzanie w locie jest włączone sprawdza od nowa.
+  @param word Słowo.
+  @return Czy udało się zapisać.
+  */
 static bool add_word (wchar_t *word) {
   dictionary_insert(dict, word);
 
@@ -301,8 +370,10 @@ static bool add_word (wchar_t *word) {
     return false;
   }
 
-  clear_all_highlighted();
-  check_buffer();
+  if (spellcheck_on) {
+    clear_all_highlighted();
+    check_buffer();
+  }
 
   return true;
 }
@@ -415,6 +486,10 @@ static void check_word (GtkMenuItem *item, gpointer data) {
   g_free(wword);
 }
 
+/**
+  Przełącza sprawdzanie pisowni w locie.
+  @param spellcheck_item Element menu decydujący o aktywowaniu.
+  */
 static void toggle_spellcheck(GtkCheckMenuItem *spellcheck_item) {
   if (gtk_check_menu_item_get_active(spellcheck_item)) {
     if (dict == NULL) {
@@ -425,17 +500,28 @@ static void toggle_spellcheck(GtkCheckMenuItem *spellcheck_item) {
       };
     }
 
+    spellcheck_on = true;
+
     check_buffer();
 
     g_signal_connect(G_OBJECT(editor_buf), "changed",
                      G_CALLBACK(check_at_cursor), NULL);
   } else {
+    spellcheck_on = false;
+
     clear_all_highlighted();
+
     g_signal_handlers_disconnect_by_func(G_OBJECT(editor_buf),
-                                         G_CALLBACK(check_buffer), NULL);
+                                         check_buffer, NULL);
   }
 }
 
+/**
+  Kod inicjujący
+  Funkcja jest uruchamiana po inicjalnizacji głównego
+  okna programu, ponieważ polega na zainicjalizowaniu
+  zmiennych globalnych edytora.
+  */
 static void setup() {
   gtk_text_buffer_create_tag(editor_buf, "misspelled",
                              "foreground", "red", NULL);
