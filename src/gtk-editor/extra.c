@@ -416,6 +416,14 @@ static void check_word (GtkMenuItem *item, gpointer data) {
 
 static void toggle_spellcheck(GtkCheckMenuItem *spellcheck_item) {
   if (gtk_check_menu_item_get_active(spellcheck_item)) {
+    if (dict == NULL) {
+      if (!select_lang()) {
+        error_dialog("Sprawdzanie pisowni nie jest możliwe – nie udało się wybrać języka");
+        gtk_check_menu_item_set_active(spellcheck_item, false);
+        return;
+      };
+    }
+
     check_buffer();
 
     g_signal_connect(G_OBJECT(editor_buf), "changed",
