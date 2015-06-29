@@ -89,8 +89,7 @@ int trie_insert_word(Trie *trie, const wchar_t *word)
 
     for (int i = 0; i < word_length; i++)
     {
-        node_add_child(current_node, word[i]);
-        current_node = node_get_child(current_node, word[i]);
+        current_node = node_add_child(current_node, word[i]);
     }
 
     if (node_is_word(current_node))
@@ -177,8 +176,7 @@ Trie * trie_load(IO *io)
                 trie_done(trie);
                 return NULL;
             }
-            node_add_child_at_end(node, c);
-            node = node_get_child(node, c);
+            node = node_add_child_at_end(node, c);
         }
     }
 

@@ -39,15 +39,17 @@ void node_done(Node *node);
   Tworzy syna węzła dla określonego znaku.
   @param[in,out] node Węzeł.
   @param[in] character Znak dodawanego węzła.
+  @return Dodany syn.
   */
-void node_add_child(Node *node, const wchar_t character);
+Node * node_add_child(Node *node, const wchar_t character);
 
 /**
   Tworzy syna węzła dla określonego znaku zakładając, że ma być ostatni.
   @param[in,out] node Węzeł.
   @param[in] character Znak dodawanego węzła.
+  @return Dodany syn.
   */
-void node_add_child_at_end(Node *node, const wchar_t character);
+Node * node_add_child_at_end(Node *node, const wchar_t character);
 
 /**
   Zwraca syna węzła o określonym znaku.
