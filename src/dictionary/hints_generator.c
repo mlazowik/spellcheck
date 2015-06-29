@@ -110,8 +110,8 @@ static int compare_state_cost(const void *_a, const void *_b)
 
 static int compare_hint_states(void *_a, void *_b)
 {
-    State *a = *(State**) _a;
-    State *b = *(State**) _b;
+    State *a = (State*) _a;
+    State *b = (State*) _b;
 
     if ((uintptr_t)a->node < (uintptr_t)b->node) return -1;
     if ((uintptr_t)a->node > (uintptr_t)b->node) return 1;
