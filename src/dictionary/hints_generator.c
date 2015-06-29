@@ -312,23 +312,12 @@ static void get_hints(Hints_Generator *gen, struct word_list *list)
 
     vector_sort(all_hints, compare_hint_strings);
 
-    for (size_t i = 0; i < vector_size(all_hints); i++)
+    size_t count = vector_size(all_hints);
+    if (count > DICTIONARY_MAX_HINTS) count = DICTIONARY_MAX_HINTS;
+    for (size_t i = 0; i < count; i++)
     {
         State *state = vector_get_by_index(all_hints, i);
-
-        if (word_list_size(list) < DICTIONARY_MAX_HINTS)
-        {
-            bool different = true;
-            if (word_list_size(list) > 0)
-            {
-                const wchar_t *prev = word_list_get(list)[word_list_size(list) - 1];
-                if (wcscoll(state->string, prev) == 0) different = false;
-            }
-            if (different)
-            {
-                word_list_add(list, state->string);
-            }
-        }
+        word_list_add(list, state->string);
 
         free(state->string);
     }
