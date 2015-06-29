@@ -52,9 +52,11 @@ int rule_get_cost(Rule *rule);
   @param rule Reguła.
   @param is_start Czy prefiks jest na początku słowa.
   @param word Słowo.
+  @param word_len Długość słowa.
   @return Czy reguła pasuje do prefiksu słowa.
   */
-bool rule_matches_prefix(Rule *rule, bool is_start, const wchar_t *word);
+bool rule_matches_prefix(Rule *rule, bool is_start, const wchar_t *word,
+                         const size_t word_len);
 
 /**
   Stosuje regułę do stanu.

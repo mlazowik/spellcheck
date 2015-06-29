@@ -330,11 +330,10 @@ int rule_get_cost(Rule *rule)
     return rule->cost;
 }
 
-bool rule_matches_prefix(Rule *rule, bool is_start, const wchar_t *word)
+bool rule_matches_prefix(Rule *rule, bool is_start, const wchar_t *word,
+                         const size_t word_len)
 {
-    int len = wcslen(word);
-
-    if (len < rule->left_len) return false;
+    if (word_len < rule->left_len) return false;
 
     if (rule->flag == RULE_BEGIN && !is_start) return false;
 

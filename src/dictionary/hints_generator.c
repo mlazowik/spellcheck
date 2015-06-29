@@ -176,7 +176,7 @@ static void match_rules_to_word(Hints_Generator *gen, const wchar_t *word)
         Rule *rule = vector_get_by_index(gen->rules, i);
         for (size_t j = 0; j <= len; j++)
         {
-            if (rule_matches_prefix(rule, (j == 0), word+j))
+            if (rule_matches_prefix(rule, (j == 0), word+j, len-j))
             {
                 int cost = rule_get_cost(rule);
                 vector_push_back(gen->word_rules[cost][len-j], rule);
