@@ -51,6 +51,14 @@ void set_clear(Set *set);
 int set_insert(Set *set, void *el);
 
 /**
+  Dodaje element na koniec zbioru.
+  @param[in,out] set Zbiór.
+  @param[in] el Dodawany element.
+  @return 0 jeśli element o danym kluczu już istnieje, 1 w p.p.
+  */
+int set_insert_at_end(Set *set, void *el);
+
+/**
   Usuwa element ze zbioru.
   @param[in,out] set Zbiór.
   @param[in] el Usuwany element.

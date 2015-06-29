@@ -92,6 +92,12 @@ int set_insert(Set *set, void *el) {
     return 1;
 }
 
+int set_insert_at_end(Set *set, void *el) {
+    vector_push_back(set->data, el);
+
+    return 1;
+}
+
 int set_delete(Set *set, void *el) {
     int pos = find_position(set, el);
 

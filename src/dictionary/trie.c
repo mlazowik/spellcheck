@@ -177,7 +177,7 @@ Trie * trie_load(IO *io)
                 trie_done(trie);
                 return NULL;
             }
-            node_add_child(node, c);
+            node_add_child_at_end(node, c);
             node = node_get_child(node, c);
         }
     }

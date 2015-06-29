@@ -95,6 +95,13 @@ void node_add_child(Node *node, const wchar_t character)
     }
 }
 
+void node_add_child_at_end(Node *node, const wchar_t character)
+{
+    Node *child = node_new(character);
+    child->parent = node;
+    set_insert_at_end(node->children, child);
+}
+
 Node * node_get_child(const Node *node, const wchar_t character)
 {
     Node *tmp = node_new(character);
