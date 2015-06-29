@@ -73,6 +73,7 @@ static int compare_state(const void *_a, const void *_b)
 
     if (!a->prev && b->prev) return -1;
     if (a->prev && !b->prev) return 1;
+    if (!a->prev && !b->prev) return 0;
 
     if ((uintptr_t)a->prev < (uintptr_t)b->prev) return -1;
     if ((uintptr_t)a->prev > (uintptr_t)b->prev) return 1;
@@ -93,6 +94,7 @@ static int compare_state_cost(const void *_a, const void *_b)
 
     if (!a->prev && b->prev) return -1;
     if (a->prev && !b->prev) return 1;
+    if (!a->prev && !b->prev) return 0;
 
     if ((uintptr_t)a->prev < (uintptr_t)b->prev) return -1;
     if ((uintptr_t)a->prev > (uintptr_t)b->prev) return 1;
@@ -116,6 +118,7 @@ static int compare_hint_states(void *_a, void *_b)
 
     if (!a->prev && b->prev) return -1;
     if (a->prev && !b->prev) return 1;
+    if (!a->prev && !b->prev) return 0;
 
     if ((uintptr_t)a->prev < (uintptr_t)b->prev) return -1;
     if ((uintptr_t)a->prev > (uintptr_t)b->prev) return 1;
