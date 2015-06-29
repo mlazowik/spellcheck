@@ -227,6 +227,8 @@ int dictionary_rule_add(struct dictionary *dict,
                         int cost,
                         enum rule_flag flag)
 {
+    if (dict == NULL) return -1;
+
     if (bidirectional)
     {
         int ret = 0;
