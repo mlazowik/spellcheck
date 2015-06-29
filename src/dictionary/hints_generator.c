@@ -77,9 +77,6 @@ static int compare_state(const void *_a, const void *_b)
     if ((uintptr_t)a->prev < (uintptr_t)b->prev) return -1;
     if ((uintptr_t)a->prev > (uintptr_t)b->prev) return 1;
 
-    if (a->expandable && !b->expandable) return -1;
-    if (!a->expandable && b->expandable) return 1;
-
     return 0;
 }
 
@@ -264,8 +261,20 @@ static void remove_duplicates(Hints_Generator *gen)
         cur = vector_get_by_index(gen->states, i);
         if (prev != NULL && compare_state(cur, prev) == 0)
         {
-            state_done(cur);
-
+            if (prev->expandable == cur->expandable)
+            {
+                state_done(cur);
+            }
+            else if (prev->cost <= cur->cost)
+            {
+                state_done(cur);
+            }
+            else
+            {
+                prev->ignore = true;
+                vector_push_back(deduplicated, cur);
+                prev = cur;
+            }
         }
         else
         {
@@ -294,7 +303,7 @@ static void get_hints(Hints_Generator *gen, struct word_list *list)
     for (size_t i = 0; i < vector_size(gen->states); i++)
     {
         State *state = vector_get_by_index(gen->states, i);
-        if (node_is_word(state->node) && state->sufix_len == 0)
+        if (!state->ignore && node_is_word(state->node) && state->sufix_len == 0)
         {
             state->string = state_to_string(state);
             vector_push_back(all_hints, state);

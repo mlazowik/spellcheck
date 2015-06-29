@@ -37,6 +37,8 @@ struct state
     int sufix_len;
     /// Czy stan można rozszerzać.
     bool expandable;
+    /// Czy ignorować przy tworzeniu podpowiedzi.
+    bool ignore;
 };
 
 /**

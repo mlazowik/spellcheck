@@ -74,6 +74,7 @@ State * state_new(Node *node, Node *prev, const wchar_t *sufix, int cost,
     state->cost = cost;
     state->sufix_len = sufix_len;
     state->expandable = expandable;
+    state->ignore = false;
 
     return state;
 }
