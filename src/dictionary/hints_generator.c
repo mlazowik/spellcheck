@@ -214,10 +214,10 @@ static void add_extended_states(Hints_Generator *gen, State *state)
 
     if (!state->expandable) return;
 
+    Node *child;
     while (state->sufix_len > 0
-           && node_get_child(state->node, state->sufix[0]) != NULL)
+           && (child = node_get_child(state->node, state->sufix[0])) != NULL)
     {
-        Node *child = node_get_child(state->node, state->sufix[0]);
         state = state_new(child, state->prev, state->sufix+1, state->cost,
                           state->sufix_len-1, state->expandable);
         add_state(gen, state);
