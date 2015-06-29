@@ -241,7 +241,6 @@ int dictionary_rule_add(struct dictionary *dict,
             ret++;
         }
 
-        if (ret == 0) return -1;
         return ret;
     }
 
@@ -249,7 +248,6 @@ int dictionary_rule_add(struct dictionary *dict,
     if (!rule_is_legal(rule))
     {
         rule_done(rule);
-        return -1;
     }
 
     hints_generator_rule_add(dict->hints_generator, rule);
