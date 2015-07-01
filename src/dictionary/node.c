@@ -93,7 +93,7 @@ Node * node_add_child(Node *node, const wchar_t character)
     if (!set_insert(node->children, child))
     {
         node_done(child);
-        return NULL;
+        return node_get_child(node, character);
     }
 
     return child;
